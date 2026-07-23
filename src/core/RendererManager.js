@@ -7,14 +7,14 @@ export function createRenderer(container) {
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-    // Sombras suaves (antes esto estaba duplicado en index.js, ahora vive acá)
+    // Sombras suaves
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
     // Esto es lo que hace que los colores cálidos del sol/fuego no se vean
     // "quemados" o planos, sino con el contraste tipo foto de la referencia
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 0.85; // más contraste, sombras más "creíbles"
+    renderer.toneMappingExposure = 0.95; // más contraste, sombras más "creíbles"
 
     renderer.outputColorSpace = THREE.SRGBColorSpace;
 
