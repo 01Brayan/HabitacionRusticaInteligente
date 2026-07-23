@@ -12,25 +12,26 @@ import * as THREE from 'three';
 const SUN_KEYFRAMES = [
     { hour: 0,    color: 0x0d1b3e, intensity: 0.0,  elevation: -90 },
     { hour: 5,    color: 0x2b3a67, intensity: 0.05, elevation: -20 },
-    { hour: 6,    color: 0xff8c5a, intensity: 1.2,  elevation: 0   },
-    { hour: 7.5,  color: 0xffc38a, intensity: 2.8,  elevation: 15  },
-    { hour: 10,   color: 0xfff1d6, intensity: 4.0,  elevation: 45  },
-    { hour: 13,   color: 0xfff2df, intensity: 3.8,  elevation: 70  },
-    { hour: 16,   color: 0xfff0da, intensity: 3.6,  elevation: 40  },
+    { hour: 5.7,  color: 0x5f7ba8, intensity: 0.3,  elevation: -8  }, // "hora azul" antes del amanecer
+    { hour: 7,    color: 0x8fa8c4, intensity: 1.0,  elevation: 3   }, // madrugada fría, sol recién asomando
+    { hour: 8.5,  color: 0xffc38a, intensity: 3.4,  elevation: 20  }, // acá recién entra el dorado, ya con fuerza
+    { hour: 11,   color: 0xffedc8, intensity: 5.0,  elevation: 55  },
+    { hour: 13,   color: 0xffe9c2, intensity: 4.8,  elevation: 70  },
+    { hour: 16,   color: 0xffe4b8, intensity: 4.4,  elevation: 40  },
     { hour: 18,   color: 0xff9a52, intensity: 2.2,  elevation: 12  },
-    { hour: 19.5, color: 0xff5e3a, intensity: 0.6,  elevation: -3  },
+    { hour: 19.5, color: 0xff5e3a, intensity: 0.5,  elevation: -3  },
     { hour: 21,   color: 0x1c2748, intensity: 0.0,  elevation: -30 },
     { hour: 24,   color: 0x0d1b3e, intensity: 0.0,  elevation: -90 },
 ];
 
 // Cielo/tierra de la hemisférica, sincronizado a grandes rasgos con el sol
 const HEMI_KEYFRAMES = [
-    { hour: 0,  sky: 0x0a1128, ground: 0x0a0806, intensity: 0.15 },
-    { hour: 6,  sky: 0xffb27a, ground: 0x2a1c12, intensity: 0.35 },
-    { hour: 12, sky: 0x87ceeb, ground: 0x3d2817, intensity: 0.55 },
-    { hour: 18, sky: 0xff9a52, ground: 0x2a1c12, intensity: 0.4  },
-    { hour: 21, sky: 0x162038, ground: 0x0a0806, intensity: 0.18 },
-    { hour: 24, sky: 0x0a1128, ground: 0x0a0806, intensity: 0.15 },
+    { hour: 0,  sky: 0x05070f, ground: 0x030201, intensity: 0.03 },
+    { hour: 6,  sky: 0x3a5670, ground: 0x0c0805, intensity: 0.06 }, // frío de madrugada, casi sin luz
+    { hour: 12, sky: 0xaebfc9, ground: 0x3d2817, intensity: 0.18 },
+    { hour: 18, sky: 0xc07a45, ground: 0x140d08, intensity: 0.08 },
+    { hour: 21, sky: 0x080c1a, ground: 0x030201, intensity: 0.035 },
+    { hour: 24, sky: 0x05070f, ground: 0x030201, intensity: 0.03 },
 ];
 
 const _colorA = new THREE.Color();
@@ -64,7 +65,7 @@ export function createLights(scene) {
     sunLight.castShadow = true;
     sunLight.shadow.mapSize.set(2048, 2048);
     sunLight.shadow.camera.near = 1;
-    sunLight.shadow.camera.far = 150;
+    sunLight.shadow.camera.far = 350; // antes 150 — con RADIUS=150 esto rompía las sombras
     // Agrandado para cubrir tu casa real (~92 unidades de ancho en X).
     // Si más adelante tu casa mide más en Z, subí este valor también.
     const d = 100;
@@ -89,7 +90,7 @@ export function createLights(scene) {
 
     // 4. RELLENO - evita que el lado sin luz directa (donde después va la chimenea)
     //    se vea negro puro mientras no exista esa luz local.
-    const fillLight = new THREE.AmbientLight(0xffffff, 0.12);
+    const fillLight = new THREE.AmbientLight(0xffffff, 0.025);
     scene.add(fillLight);
 
     // --- HOOK PARA LA CHIMENEA (sin activar todavía) ---
@@ -147,7 +148,16 @@ export function createLights(scene) {
         hemiLight.groundColor.copy(hemi.ground);
         hemiLight.intensity = hemi.intensity;
 
-        fillLight.intensity = THREE.MathUtils.lerp(0.12, 0.04, THREE.MathUtils.smoothstep(sun.elevation, -10, 20));
+        fillLight.intensity = THREE.MathUtils.lerp(0.025, 0.008, THREE.MathUtils.smoothstep(sun.elevation, -10, 20));
+
+        // El environment map (reflejos IBL de applyEnvironment) es una luz ambiental
+        // que NO estaba atada a la hora — por eso de noche seguía iluminando todo
+        // como si fuera de día. La sincronizamos acá: casi apagada de noche, notoria
+        // de día.
+        if ('environmentIntensity' in scene) {
+            const dayFactor = THREE.MathUtils.smoothstep(sun.elevation, -10, 30);
+            scene.environmentIntensity = THREE.MathUtils.lerp(0.04, 0.6, dayFactor);
+        }
     }
 
     // ESTÁTICO por ahora: fijamos la hora acá mismo.

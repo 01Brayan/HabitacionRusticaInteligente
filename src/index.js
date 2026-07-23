@@ -1,7 +1,9 @@
 import { createScene } from './core/SceneManager.js' ;
 import { createCamera } from './core/CameraManager.js';
-import { createRenderer } from './core/RendererManager.js';
+import { createRenderer , applyEnvironment} from './core/RendererManager.js';
 import { createLights } from './lights/Lights.js';
+import { createTimeGUI } from './ui/TimeGUI.js';
+
 import { setupResize } from './utils/ResizeHandler.js';
 import { startAnimation } from './animations/AnimationLoop.js';
 //crear el diseño del cielo
@@ -34,6 +36,10 @@ import { createTapeteRojo } from './objects/furniture/TapeteRojo.js';
 import { createCaja } from './objects/furniture/Caja.js';
 import { createBarril } from './objects/furniture/Barril.js';
 import { createRepisaInferior, createRepisaSuperior } from './objects/furniture/Repisa.js';
+
+
+
+
 // CONTENEDOR
 const container = document.getElementById('container');
 
@@ -45,6 +51,7 @@ const camera = createCamera();
 
 // RENDERER
 const renderer = createRenderer(container);
+applyEnvironment(scene, renderer);
 //CONTROLES
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
@@ -137,7 +144,21 @@ const roof = createRoof();
 roof.position.set(0, 0, 0);
 scene.add(roof);
 // LUCES
-createLights(scene);
+const lights = createLights(scene);
+
+// 5. GUI de hora del día (esto es lo nuevo)
+const gui = createTimeGUI({
+    min: 5,
+    max: 20,
+    initial: 7,
+    onChange: (hour) => {
+        lights.setTime(hour);
+    },
+});
+document.body.appendChild(gui.element);
+
+
+
 
 // RESPONSIVE
 setupResize(camera, renderer);

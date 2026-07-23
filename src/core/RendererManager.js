@@ -1,4 +1,3 @@
-
 import * as THREE from 'three';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 
@@ -15,7 +14,7 @@ export function createRenderer(container) {
     // Esto es lo que hace que los colores cálidos del sol/fuego no se vean
     // "quemados" o planos, sino con el contraste tipo foto de la referencia
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.1; // subí/bajá esto si toda la escena se ve muy clara/oscura
+    renderer.toneMappingExposure = 0.85; // más contraste, sombras más "creíbles"
 
     renderer.outputColorSpace = THREE.SRGBColorSpace;
 
