@@ -10,6 +10,7 @@ import { startAnimation } from './animations/AnimationLoop.js';
 import {createSkybox} from './objects/Skybox.js'
 
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { DirectionalLightHelper } from 'three'; // --esto fue modificado: helper para ver dirección del sol (luego lo borraremos)
 //crear cama
 import {createBed} from './objects/furniture/Bed.js';
 //crear piso
@@ -57,9 +58,9 @@ const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 controls.dampingFactor = 0.05;
 
-// AGREGAR ENTORNO (SKYBOX)
-const skybox = createSkybox();
-scene.add(skybox);
+// AGREGAR ENTORNO (SKYBOX) -- comentado temporalmente para ver el sol real
+//const skybox = createSkybox();
+//scene.add(skybox);
 
 // AGREGAR PISO
 const floor = createFloor();
@@ -146,7 +147,11 @@ scene.add(roof);
 // LUCES
 const lights = createLights(scene);
 
-// 5. GUI de hora del día (esto es lo nuevo)
+// Helper visual que muestra la dirección del sol (opcional, puedes borrarlo después)
+const sunHelper = new DirectionalLightHelper(lights.sunLight, 15);
+scene.add(sunHelper);
+
+// GUI de hora del día
 const gui = createTimeGUI({
     min: 5,
     max: 20,

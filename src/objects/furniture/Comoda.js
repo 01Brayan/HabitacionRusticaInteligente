@@ -26,10 +26,10 @@ export function createComoda() {
     const maderaMat = new THREE.MeshStandardMaterial({
         map: maderaDiffuse,
         normalMap: maderaNormal,
-        normalScale: new THREE.Vector2(0.55, 0.55), // --esto fue modificado: se agregó normalScale para dar volumen real al relieve de la madera
+        normalScale: new THREE.Vector2(1.0, 1.0), // relieve marcado para madera rústica
         roughnessMap: maderaRough,
         color: 0x2E2418, 
-        roughness: 0.6,
+        roughness: 1,
     });
 
     const manijaMat = new THREE.MeshStandardMaterial({

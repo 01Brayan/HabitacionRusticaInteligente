@@ -14,7 +14,7 @@ export function createRenderer(container) {
     // Esto es lo que hace que los colores cálidos del sol/fuego no se vean
     // "quemados" o planos, sino con el contraste tipo foto de la referencia
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 0.95; // más contraste, sombras más "creíbles"
+    renderer.toneMappingExposure = 1;
 
     renderer.outputColorSpace = THREE.SRGBColorSpace;
 

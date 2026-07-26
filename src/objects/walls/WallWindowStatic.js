@@ -112,7 +112,7 @@ export function createWallWindowStatic() {
     // ========================================================
 
     // 1. EL VIDRIO
-    const vidrio = new THREE.Mesh(new THREE.BoxGeometry(0.5, 8.865, 15.718), vidrioMat);
+    const vidrio = new THREE.Mesh(new THREE.BoxGeometry(0.25, 8.865, 15.718), vidrioMat);
     vidrio.position.set(45.548, 21.252, -14.963);
     wallGroup.add(vidrio);
 

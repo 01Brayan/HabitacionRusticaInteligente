@@ -24,10 +24,10 @@ export function createRopero() {
     const maderaMat = new THREE.MeshStandardMaterial({
         map: maderaDiffuse,
         normalMap: maderaNormal,
-        normalScale: new THREE.Vector2(0.55, 0.55), // --esto fue modificado: agregado normalScale para el relieve del ropero
+        normalScale: new THREE.Vector2(1.0, 1.0), // relieve marcado para madera rústica realista
         roughnessMap: maderaRough,
         color: 0x2E2418,
-        roughness: 0.6,
+        roughness: 1,
     });
 
     const manijaMat = new THREE.MeshStandardMaterial({

@@ -138,7 +138,7 @@ export function createWallWindow() {
     hojaIzqGroup.name = "ventanaIzquierda";
     hojaIzqGroup.position.set(-45.384, 21.43, -33.637);
 
-    const vidrioIzq = new THREE.Mesh(new THREE.BoxGeometry(0.5, 9.288, 7.5), vidrioMat);
+    const vidrioIzq = new THREE.Mesh(new THREE.BoxGeometry(0.25, 9.288, 7.5), vidrioMat);
     vidrioIzq.position.set(-0.75, 0.042, -4.348);
     hojaIzqGroup.add(vidrioIzq);
 
@@ -181,7 +181,7 @@ export function createWallWindow() {
     hojaDerGroup.name = "ventanaDerecha";
     hojaDerGroup.position.set(-45.384, 21.43, -50.584);
 
-    const vidrioDer = new THREE.Mesh(new THREE.BoxGeometry(0.5, 9.288, 7.5), vidrioMat);
+    const vidrioDer = new THREE.Mesh(new THREE.BoxGeometry(0.25, 9.288, 7.5), vidrioMat);
     vidrioDer.position.set(-0.75, 0.042, 4.386);
     hojaDerGroup.add(vidrioDer);
 

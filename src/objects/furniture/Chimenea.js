@@ -63,7 +63,7 @@ export function createChimenea() {
         normalMap: maderaNormal,
         roughnessMap: maderaRough,
         color: 0x1a0f08,
-        roughness: 0.45,
+        roughness: 0.9, // madera rústica, no refleja
     });
 
     const hogarInteriorMat = new THREE.MeshStandardMaterial({

@@ -11,7 +11,9 @@ export function createTapeteBlanco() {
 
     const tapeteMat = new THREE.MeshStandardMaterial({
         map: tapeteDiffuse,
-        roughness: 0.9, // Los tapetes son opacos y no brillan
+        bumpMap: tapeteDiffuse,   // la misma textura en grises da relieve de tejido
+        bumpScale: 0.2,          // profundidad sutil para un tapete blanco
+        roughness: 1.0,
     });
 
     const tapeteGeo = new THREE.BoxGeometry(50.203, 0.36, 31.923); 

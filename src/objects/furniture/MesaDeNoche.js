@@ -23,10 +23,10 @@ export function createMesaDeNoche() {
     const maderaMat = new THREE.MeshStandardMaterial({
         map: maderaDiffuse,
         normalMap: maderaNormal,
-        normalScale: new THREE.Vector2(0.55, 0.55), // --esto fue modificado: se agregó normalScale para el relieve de la mesa de noche
+        normalScale: new THREE.Vector2(1.0, 1.0), // relieve marcado para madera rústica realista
         roughnessMap: maderaRough,
         color: 0x3D2C1E,
-        roughness: 0.55,
+        roughness: 1, // madera rústica absorbe luz, no refleja
     });
 
     const manijaMat = new THREE.MeshStandardMaterial({

@@ -26,13 +26,13 @@ export function createSofa() {
 
     const maderaMat = new THREE.MeshStandardMaterial({
         map: maderaDiffuse, normalMap: maderaNormal, roughnessMap: maderaRough,
-        normalScale: new THREE.Vector2(0.55, 0.55), // --esto fue modificado: agregado normalScale para relieve de madera
-        color: 0x1a0f08, roughness: 0.5,
+        normalScale: new THREE.Vector2(1.0, 1.0),
+        color: 0x1a0f08, roughness: 1,
     });
     const maderaClara = new THREE.MeshStandardMaterial({
         map: maderaDiffuse, normalMap: maderaNormal, roughnessMap: maderaRough,
-        normalScale: new THREE.Vector2(0.55, 0.55), // --esto fue modificado: agregado normalScale para relieve en madera oscura
-        color: 0x6E5A3E, roughness: 0.55,
+        normalScale: new THREE.Vector2(1.0, 1.0),
+        color: 0x6E5A3E, roughness: 1,
     });
 
     // ---------------------------------------------------------------

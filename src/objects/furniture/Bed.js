@@ -24,19 +24,19 @@ export function createBed() {
     const maderaMat = new THREE.MeshStandardMaterial({
         map: maderaDiffuse,
         normalMap: maderaNormal,
-        normalScale: new THREE.Vector2(0.65, 0.65), 
+        normalScale: new THREE.Vector2(1.0, 1.0), 
         roughnessMap: maderaRough,
         color: 0x3D2C1E,
-        roughness: 0.68,
+        roughness: 1,
     });
 
     const madederaClaraMat = new THREE.MeshStandardMaterial({
         map: maderaDiffuse,
         normalMap: maderaNormal,
-        normalScale: new THREE.Vector2(0.65, 0.65),
+        normalScale: new THREE.Vector2(1.0, 1.0),
         roughnessMap: maderaRough,
         color: 0x6E5A3E, 
-        roughness: 0.45,
+        roughness: 1,
     });
 
     // ---------------------------------------------------------------

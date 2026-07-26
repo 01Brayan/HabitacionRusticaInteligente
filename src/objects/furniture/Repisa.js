@@ -20,19 +20,19 @@ import * as THREE from 'three';
     const soporteMat = new THREE.MeshStandardMaterial({
         map: maderaDiffuse,
         normalMap: maderaNormal,
-        normalScale: new THREE.Vector2(0.55, 0.55), // --esto fue modificado: agregado normalScale para el relieve
+        normalScale: new THREE.Vector2(1.0, 1.0),
         roughnessMap: maderaRough,
         color: 0x6E5A3E, 
-        roughness: 0.6,
+        roughness: 1,
     });
 
     const maderaMat = new THREE.MeshStandardMaterial({
         map: maderaDiffuse,
         normalMap: maderaNormal,
-        normalScale: new THREE.Vector2(0.55, 0.55), // --esto fue modificado: agregado normalScale para el relieve
+        normalScale: new THREE.Vector2(1.0, 1.0),
         roughnessMap: maderaRough,
         color: 0x2E2418, 
-        roughness: 0.6,
+        roughness: 1,
     });
 
 
