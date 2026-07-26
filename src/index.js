@@ -188,7 +188,8 @@ function createClimateControls() {
     const buttons = [
         { id: 'btn-lluvia', label: 'Lluvia' },
         { id: 'btn-nieve', label: 'Nieve' },
-        { id: 'btn-neblina', label: 'Neblina' }
+        { id: 'btn-neblina', label: 'Neblina' },
+        { id: 'btn-detener', label: 'Detener' }
     ];
 
     buttons.forEach(({ id, label }) => {
@@ -207,7 +208,11 @@ function createClimateControls() {
         button.addEventListener('mouseout', () => button.style.transform = 'scale(1)');
         button.addEventListener('click', () => {
             const weatherKey = id.replace('btn-', '');
-            setClimate(weatherKey);
+            if (weatherKey === 'detener') {
+                setClimate(null);
+            } else {
+                setClimate(weatherKey);
+            }
         });
         panel.appendChild(button);
     });
@@ -223,7 +228,8 @@ function initializeClimateControls() {
     climateButtons = {
         lluvia: document.getElementById('btn-lluvia'),
         nieve: document.getElementById('btn-nieve'),
-        neblina: document.getElementById('btn-neblina')
+        neblina: document.getElementById('btn-neblina'),
+        detener: document.getElementById('btn-detener')
     };
 
     hasClimateControls = Boolean(climateButtons.lluvia && climateButtons.nieve && climateButtons.neblina);
@@ -278,6 +284,17 @@ function setClimate(active) {
             if (!button) {
                 return;
             }
+            if (key === 'detener') {
+                if (!active) {
+                    button.classList.add('active');
+                    button.style.background = '#ff5c5c';
+                } else {
+                    button.classList.remove('active');
+                    button.style.background = '#2a2f47';
+                }
+                return;
+            }
+
             if (activeStates[key]) {
                 button.classList.add('active');
                 button.style.background = '#5c82ff';
