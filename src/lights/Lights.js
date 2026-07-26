@@ -1,25 +1,17 @@
 import * as THREE from 'three';
 
-/**
- * Sistema de iluminación con ciclo día/noche.
- * Por ahora se usa de forma ESTÁTICA (se llama createLights(scene) y ya
- * queda fijado a una hora), pero internamente ya está listo para que el
- * día de mañana conectes un slider y llames a lights.setTime(hour) en un
- * loop/onChange sin tener que tocar esta lógica de nuevo.
- */
-
 // Puntos clave del sol. "hour" en formato 0-24 (podés usar decimales, ej: 6.5 = 6:30am)
 const SUN_KEYFRAMES = [
     { hour: 0,    color: 0x0d1b3e, intensity: 0.0,  elevation: -90 },
     { hour: 5,    color: 0x2b3a67, intensity: 0.05, elevation: -20 },
     { hour: 5.7,  color: 0x5f7ba8, intensity: 0.3,  elevation: -8  }, // "hora azul" antes del amanecer
     { hour: 7,    color: 0x8fa8c4, intensity: 1.0,  elevation: 3   }, // madrugada fría, sol recién asomando
-    { hour: 8.5,  color: 0xffc38a, intensity: 3.4,  elevation: 20  }, // acá recién entra el dorado, ya con fuerza
+    { hour: 8.5,  color: 0xff9442, intensity: 3.4,  elevation: 20  }, // acá recién entra el dorado, ya con fuerza
     { hour: 11,   color: 0xffedc8, intensity: 5.0,  elevation: 55  },
     { hour: 13,   color: 0xffe9c2, intensity: 4.8,  elevation: 70  },
     { hour: 16,   color: 0xffe4b8, intensity: 4.4,  elevation: 40  },
     { hour: 18,   color: 0xff9a52, intensity: 2.2,  elevation: 12  },
-    { hour: 19.5, color: 0xff5e3a, intensity: 0.5,  elevation: -3  },
+    { hour: 19.5, color: 0xff3a1a, intensity: 0.5,  elevation: -3  },
     { hour: 21,   color: 0x1c2748, intensity: 0.0,  elevation: -30 },
     { hour: 24,   color: 0x0d1b3e, intensity: 0.0,  elevation: -90 },
 ];
@@ -28,7 +20,7 @@ const SUN_KEYFRAMES = [
 const HEMI_KEYFRAMES = [
     { hour: 0,  sky: 0x05070f, ground: 0x030201, intensity: 0.03 },
     { hour: 6,  sky: 0x3a5670, ground: 0x0c0805, intensity: 0.06 }, // frío de madrugada, casi sin luz
-    { hour: 12, sky: 0xaebfc9, ground: 0x3d2817, intensity: 0.18 },
+    { hour: 12, sky: 0xaebfc9, ground: 0x3d2817, intensity: 0.25 },
     { hour: 18, sky: 0xc07a45, ground: 0x140d08, intensity: 0.08 },
     { hour: 21, sky: 0x080c1a, ground: 0x030201, intensity: 0.035 },
     { hour: 24, sky: 0x05070f, ground: 0x030201, intensity: 0.03 },
