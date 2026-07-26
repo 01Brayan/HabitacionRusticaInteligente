@@ -41,7 +41,7 @@ export function createWallWindow() {
     const wallMat = new THREE.MeshStandardMaterial({
         map: paredDiffuse,
         normalMap: paredNormal,
-        normalScale: new THREE.Vector2(0.4, 0.4),
+        normalScale: new THREE.Vector2(1.0, 1.0),
         roughnessMap: paredRough,
         aoMap: paredAO,
         color: 0x5C4530,
@@ -52,7 +52,7 @@ export function createWallWindow() {
     const marcoMat = new THREE.MeshStandardMaterial({
         map: maderaDiffuse,
         normalMap: maderaNormal,
-        normalScale: new THREE.Vector2(0.4, 0.4),
+        normalScale: new THREE.Vector2(1.0, 1.0),
         roughnessMap: maderaRough,
         aoMap: maderaAO,
         color: 0x4A3220,
@@ -63,7 +63,7 @@ export function createWallWindow() {
     const marcoHojaMat = new THREE.MeshStandardMaterial({
         map: maderaDiffuse,
         normalMap: maderaNormal,
-        normalScale: new THREE.Vector2(0.4, 0.4),
+        normalScale: new THREE.Vector2(1.0, 1.0),
         roughnessMap: maderaRough,
         aoMap: maderaAO,
         color: 0x3A2718,

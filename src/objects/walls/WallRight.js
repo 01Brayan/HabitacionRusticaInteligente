@@ -52,7 +52,7 @@ export function createWallRight() {
     const wallMat = new THREE.MeshStandardMaterial({
         map: paredDiffuse,
         normalMap: paredNormal,
-        normalScale: new THREE.Vector2(0.4, 0.4),
+        normalScale: new THREE.Vector2(1.0, 1.0),
         roughnessMap: paredRough,
         aoMap: paredAO,
         color: 0x5C4530,
@@ -62,7 +62,7 @@ export function createWallRight() {
     const pilaresMat = new THREE.MeshStandardMaterial({
         map: maderaDiffuse,
         normalMap: maderaNormal,
-        normalScale: new THREE.Vector2(0.4, 0.4),
+        normalScale: new THREE.Vector2(1.0, 1.0),
         roughnessMap: maderaRough,
         aoMap: maderaAO,
         color: 0x3A2718, 
@@ -72,7 +72,6 @@ export function createWallRight() {
     const vigasHorizontalesMat = new THREE.MeshStandardMaterial({
         map: maderaDiffuse,
         normalMap: maderaNormal,
-        normalScale: new THREE.Vector2(0.4, 0.4),
         roughnessMap: maderaRough,
         aoMap: maderaAO,
         color: 0x4A3220, 

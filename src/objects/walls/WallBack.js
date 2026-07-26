@@ -61,17 +61,17 @@ export function createWallBack() {
     const pilaresMat = new THREE.MeshStandardMaterial({
         map: maderaDiffuse,
         normalMap: maderaNormal,
-        normalScale: new THREE.Vector2(0.4, 0.4),
+        normalScale: new THREE.Vector2(1.0, 1.0),
         roughnessMap: maderaRough,
         aoMap: maderaAO,
-        color: 0x3A2718, // columnas = tono más oscuro
+        color: 0x3A2718,
         roughness: 1.0,
     });
 
     const horizontalesMat = new THREE.MeshStandardMaterial({
         map: maderaDiffuse,
         normalMap: maderaNormal,
-        normalScale: new THREE.Vector2(0.4, 0.4),
+        normalScale: new THREE.Vector2(1.0, 1.0),
         roughnessMap: maderaRough,
         aoMap: maderaAO,
         color: 0x4A3220, // vigas = tono intermedio

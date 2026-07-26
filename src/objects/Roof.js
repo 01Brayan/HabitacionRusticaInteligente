@@ -48,7 +48,7 @@ export function createRoof() {
     const vigasDiagonalesMat = new THREE.MeshStandardMaterial({
         map: vigaDiffuse,
         normalMap: vigaNormal,
-        normalScale: new THREE.Vector2(0.4, 0.4),
+        normalScale: new THREE.Vector2(1.0, 1.0),
         roughnessMap: vigaRough,
         aoMap: vigaAO,
         color: 0x4A3220,
