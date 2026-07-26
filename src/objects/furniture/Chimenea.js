@@ -1,5 +1,5 @@
 // ===============================================================
-// MUEBLE: CHIMENEA DE PIEDRA Y MADERA
+// CHIMENEA DE PIEDRA Y MADERA
 // ===============================================================
 import * as THREE from 'three';
 
@@ -10,7 +10,7 @@ export function createChimenea() {
     const textureLoader = new THREE.TextureLoader();
 
     // ---------------------------------------------------------------
-    // 1. CARGA DE TEXTURAS (Piedra, Piedra Oscura y Madera)
+    //CARGA DE TEXTURAS (Piedra, Piedra Oscura y Madera)
     // ---------------------------------------------------------------
     const maderaDiffuse = textureLoader.load('src/assets/textures/wood_dark_001/wood_dark_001_Color_2K.jpg');
     const maderaNormal  = textureLoader.load('src/assets/textures/wood_dark_001/wood_dark_001_Normal_2K.jpg');

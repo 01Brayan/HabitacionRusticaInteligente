@@ -184,5 +184,17 @@ export function createWallWindowStatic() {
     marcoMediVertDerecho.position.set(45.536, 21.252, -12.454);
     wallGroup.add(marcoMediVertDerecho);
 
+    // --esto fue modificado: Recorrido para activar sombras en maderas y marcos, pero NO en el vidrio transparente (evita sombra fea de caja)
+    wallGroup.traverse((child) => {
+        if (child.isMesh) {
+            if (child.material === vidrioMat) {
+                child.castShadow = false;  // El vidrio no debe proyectar sombra opaca
+            } else {
+                child.castShadow = true;
+            }
+            child.receiveShadow = true;
+        }
+    });
+
     return wallGroup;
 }

@@ -217,5 +217,17 @@ export function createWallWindow() {
 
     wallGroup.add(hojaDerGroup);
 
+    // --esto fue modificado: Recorrido para activar sombras en maderas, evitando que el vidrio transparente proyecte sombra opaca
+    wallGroup.traverse((child) => {
+        if (child.isMesh) {
+            if (child.material === vidrioMat) {
+                child.castShadow = false;
+            } else {
+                child.castShadow = true;
+            }
+            child.receiveShadow = true;
+        }
+    });
+
     return wallGroup;
 }
