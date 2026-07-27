@@ -10,7 +10,6 @@ import { startAnimation } from './animations/AnimationLoop.js';
 import {createSkybox} from './objects/Skybox.js'
 
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { DirectionalLightHelper } from 'three'; // --esto fue modificado: helper para ver dirección del sol (luego lo borraremos)
 //crear cama
 import {createBed} from './objects/furniture/Bed.js';
 //crear piso
@@ -146,10 +145,6 @@ roof.position.set(0, 0, 0);
 scene.add(roof);
 // LUCES
 const lights = createLights(scene);
-
-// Helper visual que muestra la dirección del sol (opcional, puedes borrarlo después)
-const sunHelper = new DirectionalLightHelper(lights.sunLight, 15);
-scene.add(sunHelper);
 
 // GUI de hora del día
 const gui = createTimeGUI({

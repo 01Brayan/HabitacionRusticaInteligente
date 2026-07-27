@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { Sky } from 'three/addons/objects/Sky.js';
 
 // Puntos clave del sol. "hour" en formato 0-24 (podés usar decimales, ej: 6.5 = 6:30am)
 // ============================================================
@@ -125,6 +126,19 @@ export function createLights(scene) {
     const fillLight = new THREE.AmbientLight(0xffe9c2, 0.2);
     scene.add(fillLight);
 
+    // 5. CIELO PROCEDURAL 3D (Sky de Three.js)
+    const sky = new Sky();
+    sky.scale.setScalar(1000);
+    scene.add(sky);
+    scene.background = null; // El Sky actúa como fondo
+
+    // Ajustes atmosféricos del cielo procedural
+    const skyUniforms = sky.material.uniforms;
+    skyUniforms.turbidity.value = 7;    // 0-20: más alto = más brumoso
+    skyUniforms.rayleigh.value = 0.1;   // 0-4: intensidad del color del cielo
+    skyUniforms.mieCoefficient.value = 0.005;
+    skyUniforms.mieDirectionalG.value = 0.8;
+
     function setTime(hour) {
 
         // 1. Interpolar color e intensidad del sol desde los keyframes
@@ -136,10 +150,11 @@ export function createLights(scene) {
 
         // 4. Aplicar color al sol
         sunLight.color.copy(sun.color);
-        // 5. Sincronizar la niebla con el color del cielo del keyframe actual
+        // 5. Sincronizar la niebla y el fondo con el color del cielo
         if (scene.fog) {
             scene.fog.color.copy(hemi.sky);
         }
+        scene.background = hemi.sky.clone(); // Fondo sólido del color del cielo en esa hora
         // 6. Transición día/noche según la altura Y del sol:
         //    - Y > 10 → luz al 100%
         //    - Y entre -5 y 10 → crepúsculo gradual
@@ -151,6 +166,9 @@ export function createLights(scene) {
         // 7. Posicionar el sol y la luna
         sunLight.position.copy(sunPos);
         sunLight.target.position.set(0, 0, -18);
+
+        // Sincronizar el cielo procedural con la posición del sol
+        skyUniforms.sunPosition.value.copy(sunPos);
 
         // Luna: opuesta al sol, siempre un poco sobre el horizonte
         const moonPos = new THREE.Vector3().copy(sunPos).negate();
