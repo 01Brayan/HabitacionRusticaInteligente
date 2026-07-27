@@ -34,6 +34,13 @@ import { createTapeteRojo } from './objects/furniture/TapeteRojo.js';
 import { createCaja } from './objects/furniture/Caja.js';
 import { createBarril } from './objects/furniture/Barril.js';
 import { createRepisaInferior, createRepisaSuperior } from './objects/furniture/Repisa.js';
+
+//Import del editor 3D
+import { Editor3D } from './editor/Editor3D.js';
+//import de las decoraciones
+import { createDecorations } from './objects/decorations/Decorations.js';
+
+
 // CONTENEDOR
 const container = document.getElementById('container');
 
@@ -49,6 +56,9 @@ const renderer = createRenderer(container);
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 controls.dampingFactor = 0.05;
+
+//editor 3D
+const editor = new Editor3D(scene, camera, renderer, controls);
 
 // AGREGAR ENTORNO (SKYBOX)
 const skybox = createSkybox();
@@ -141,6 +151,39 @@ createLights(scene);
 
 // RESPONSIVE
 setupResize(camera, renderer);
+
+// Nombres para que saveLayout/loadLayout los identifique correctamente
+bed.name = 'bed';
+mesaDeNoche.name = 'mesaDeNoche';
+mesaDeNoche2.name = 'mesaDeNoche2';
+ropero.name = 'ropero';
+estanteria.name = 'estanteria';
+comoda.name = 'comoda';
+chiminea.name = 'chiminea';
+mesacentro.name = 'mesacentro';
+sofa.name = 'sofa';
+tapeteblanco.name = 'tapeteblanco';
+tapeterojo.name = 'tapeterojo';
+cajademadera.name = 'cajademadera';
+barril.name = 'barril';
+repisa.name = 'repisa';
+repisainf.name = 'repisainf';
+
+// AGREGAR DECORACIONES (objetos importados de Blender)
+const decorations = await createDecorations();
+scene.add(decorations);
+
+console.log('Objetos en decorations:', decorations.children.map(o => o.name));
+
+editor.add(
+    bed, mesaDeNoche, mesaDeNoche2, ropero, estanteria, comoda,
+    chiminea, mesacentro, sofa, tapeteblanco, tapeterojo,
+    cajademadera, barril, repisa, repisainf,
+    ...decorations.children
+);
+
+// Carga el layout guardado (si existe) — debe ir DESPUÉS de editor.add()
+await editor.loadLayoutFromFile('src/assets/layout.json');
 
 // ANIMACIÓN
 startAnimation(renderer, scene, camera, controls);

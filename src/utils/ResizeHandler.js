@@ -3,7 +3,7 @@ export function setupResize (camera, renderer){
         'resize',
         ()=> {
             camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatix();
+            camera.updateProjectionMatrix();
             renderer.setSize(
                 window.innerWidth,
                 window.innerHeight
