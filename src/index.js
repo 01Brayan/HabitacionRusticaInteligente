@@ -25,9 +25,7 @@ import * as THREE from 'three';
 import { createRoof } from './objects/Roof.js';
 
 // importar clima
-import { createLluviaEffect } from './climates/Lluvia.js';
-import { createNieveEffect } from './climates/Nieve.js';
-import { createNeblinaEffect } from './climates/Neblina.js';
+import { createClimaFrio } from './climates/ClimaFrio.js';
 
 // importacion de objetos
 import { createMesaDeNoche } from './objects/furniture/MesaDeNoche.js';
@@ -168,171 +166,37 @@ document.body.appendChild(gui.element);
 
 
 
-// EFECTOS DE CLIMA
-const lluviaEffect = createLluviaEffect();
-const nieveEffect = createNieveEffect();
-const neblinaEffect = createNeblinaEffect();
+// CLIMA: MODO FRIO
+const climaFrio = createClimaFrio(scene);
+const climaUpdaters = [climaFrio.update];
 
-lluviaEffect.group.position.set(0, 0, 0);
-nieveEffect.group.position.set(0, 0, 0);
-neblinaEffect.group.position.set(0, 0, 0);
+// Checkbox para activar/desactivar el frio
+const frioLabel = document.createElement('label');
+frioLabel.style.cssText = 'position:absolute;bottom:20px;left:20px;color:#fff;font-family:Arial;font-size:1rem;background:rgba(18,18,28,0.85);padding:10px 16px;border-radius:8px;z-index:1000;display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;';
 
-lluviaEffect.group.visible = false;
-nieveEffect.group.visible = false;
-neblinaEffect.group.visible = false;
+const frioCheck = document.createElement('input');
+frioCheck.type = 'checkbox';
+frioCheck.style.width = '18px';
+frioCheck.style.height = '18px';
+frioCheck.style.cursor = 'pointer';
 
-scene.add(lluviaEffect.group);
-scene.add(nieveEffect.group);
-scene.add(neblinaEffect.group);
-
-const climateUpdaters = [lluviaEffect.update, nieveEffect.update, neblinaEffect.update];
-const weatherHint = document.getElementById('weather-hint');
-
-function createClimateControls() {
-    const panel = document.createElement('div');
-    panel.id = 'climate-panel';
-    panel.style.position = 'absolute';
-    panel.style.top = '20px';
-    panel.style.right = '20px';
-    panel.style.display = 'flex';
-    panel.style.gap = '8px';
-    panel.style.padding = '10px';
-    panel.style.background = 'rgba(18, 18, 28, 0.85)';
-    panel.style.borderRadius = '8px';
-    panel.style.zIndex = '1000';
-    panel.style.fontFamily = 'Arial, sans-serif';
-
-    const buttons = [
-        { id: 'btn-lluvia', label: 'Lluvia' },
-        { id: 'btn-nieve', label: 'Nieve' },
-        { id: 'btn-neblina', label: 'Neblina' },
-        { id: 'btn-detener', label: 'Detener' }
-    ];
-
-    buttons.forEach(({ id, label }) => {
-        const button = document.createElement('button');
-        button.id = id;
-        button.textContent = label;
-        button.style.padding = '8px 12px';
-        button.style.border = 'none';
-        button.style.borderRadius = '5px';
-        button.style.background = '#2a2f47';
-        button.style.color = '#fff';
-        button.style.cursor = 'pointer';
-        button.style.fontSize = '0.9rem';
-        button.style.transition = 'transform 0.15s ease, background 0.15s ease';
-        button.addEventListener('mouseover', () => button.style.transform = 'scale(1.04)');
-        button.addEventListener('mouseout', () => button.style.transform = 'scale(1)');
-        button.addEventListener('click', () => {
-            const weatherKey = id.replace('btn-', '');
-            if (weatherKey === 'detener') {
-                setClimate(null);
-            } else {
-                setClimate(weatherKey);
-            }
-        });
-        panel.appendChild(button);
-    });
-
-    document.body.appendChild(panel);
-}
-
-function initializeClimateControls() {
-    if (!document.getElementById('btn-lluvia') || !document.getElementById('btn-nieve') || !document.getElementById('btn-neblina')) {
-        createClimateControls();
-    }
-
-    climateButtons = {
-        lluvia: document.getElementById('btn-lluvia'),
-        nieve: document.getElementById('btn-nieve'),
-        neblina: document.getElementById('btn-neblina'),
-        detener: document.getElementById('btn-detener')
-    };
-
-    hasClimateControls = Boolean(climateButtons.lluvia && climateButtons.nieve && climateButtons.neblina);
-}
-
-let climateButtons = {
-    lluvia: document.getElementById('btn-lluvia'),
-    nieve: document.getElementById('btn-nieve'),
-    neblina: document.getElementById('btn-neblina')
-};
-
-let hasClimateControls = false;
-let activeWeather = null;
-
-initializeClimateControls();
-
-function updateWeatherHint() {
-    if (!weatherHint) {
-        return;
-    }
-
-    if (activeWeather) {
-        const label = activeWeather.charAt(0).toUpperCase() + activeWeather.slice(1);
-        weatherHint.textContent = `Clima activo: ${label}.`;
+frioCheck.addEventListener('change', () => {
+    climaFrio.toggle();
+    if (climaFrio.state.activo) {
+        frioLabel.style.background = 'rgba(58, 100, 150, 0.9)';
     } else {
-        weatherHint.textContent = 'Selecciona un clima.';
+        frioLabel.style.background = 'rgba(18, 18, 28, 0.85)';
     }
-}
+});
 
-function setClimate(active) {
-    const activeStates = {
-        lluvia: active === 'lluvia',
-        nieve: active === 'nieve',
-        neblina: active === 'neblina'
-    };
+const frioText = document.createElement('span');
+frioText.textContent = 'FRIO';
 
-    activeWeather = active;
-    lluviaEffect.group.visible = activeStates.lluvia;
-    nieveEffect.group.visible = activeStates.nieve;
-    neblinaEffect.group.visible = activeStates.neblina;
+frioLabel.appendChild(frioCheck);
+frioLabel.appendChild(frioText);
+document.body.appendChild(frioLabel);
+// FIN CLIMA
 
-    // Guardar la niebla atmosférica base (de Lights.js) si existe
-    if (!window._baseFog && scene.fog) {
-        window._baseFog = scene.fog;
-    }
-    // Neblina: reemplaza la niebla con una más densa; si se apaga, restaura la base
-    scene.fog = activeStates.neblina
-        ? new THREE.FogExp2(0xb3c5d3, 0.00145)
-        : (window._baseFog || null);
-
-    
-    updateWeatherHint();
-
-    if (hasClimateControls) {
-        Object.keys(climateButtons).forEach((key) => {
-            const button = climateButtons[key];
-            if (!button) {
-                return;
-            }
-            if (key === 'detener') {
-                if (!active) {
-                    button.classList.add('active');
-                    button.style.background = '#ff5c5c';
-                } else {
-                    button.classList.remove('active');
-                    button.style.background = '#2a2f47';
-                }
-                return;
-            }
-
-            if (activeStates[key]) {
-                button.classList.add('active');
-                button.style.background = '#5c82ff';
-            } else {
-                button.classList.remove('active');
-                button.style.background = '#2a2f47';
-            }
-        });
-    }
-}
-
-function toggleClimate(key) {
-    setClimate(key);
-}
-
-setClimate(null);
 // RESPONSIVE
 setupResize(camera, renderer);
 
