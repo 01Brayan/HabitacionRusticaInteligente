@@ -1,92 +1,106 @@
+// ===============================================================
+// REPISAS DE PARED (SUPERIOR E INFERIOR)
+// ===============================================================
 import * as THREE from 'three';
 
-const soporteMat = new THREE.MeshStandardMaterial({
-    color: 0x1a1a1a, // metal oscuro, como en tu referencia
-    metalness: 0.6,
-    roughness: 0.4,
-});
-
-const maderaMat = new THREE.MeshStandardMaterial({
-    color: 0x3d2c1e,
-    roughness: 0.6,
-});
-
 // ---------------------------------------------------------------
-// REPISA SUPERIOR 
+// MATERIALES COMPARTIDOS (Madera PBR + soporte)
 // ---------------------------------------------------------------
-export function createRepisaSuperior() {
-    const repisaGroup = new THREE.Group();
-    repisaGroup.name = "repisaSuperior";
+    const textureLoader = new THREE.TextureLoader();
+    const maderaDiffuse = textureLoader.load('src/assets/textures/wood_dark_001/wood_dark_001_Color_2K.jpg');
+    const maderaNormal  = textureLoader.load('src/assets/textures/wood_dark_001/wood_dark_001_Normal_2K.jpg');
+    const maderaRough   = textureLoader.load('src/assets/textures/wood_dark_001/wood_dark_001_Roughness_2K.jpg');
 
-    // Tabla principal
-    const tablaGeo = new THREE.BoxGeometry(19.7, 1, 4);
+    maderaDiffuse.colorSpace = THREE.SRGBColorSpace;
+    [maderaDiffuse, maderaNormal, maderaRough].forEach((tex) => {
+        tex.wrapS = THREE.RepeatWrapping;
+        tex.wrapT = THREE.RepeatWrapping;
+        tex.repeat.set(1, 2); 
+    });
+    const soporteMat = new THREE.MeshStandardMaterial({
+        map: maderaDiffuse,
+        normalMap: maderaNormal,
+        normalScale: new THREE.Vector2(1.0, 1.0),
+        roughnessMap: maderaRough,
+        color: 0x6E5A3E, 
+        roughness: 1,
+    });
+
+    const maderaMat = new THREE.MeshStandardMaterial({
+        map: maderaDiffuse,
+        normalMap: maderaNormal,
+        normalScale: new THREE.Vector2(1.0, 1.0),
+        roughnessMap: maderaRough,
+        color: 0x2E2418, 
+        roughness: 1,
+    });
+
+
+// Geometrías reusables
+const tablaGeo = new THREE.BoxGeometry(19.7, 1, 4);
+const tablainferiorGeo = new THREE.BoxGeometry(19.3, 0.31, 3.706);
+const brazoDiagonalGeo = new THREE.BoxGeometry(0.7, 0.7, 3.5);
+const brazoVertiGeo = new THREE.BoxGeometry(0.7, 1.982, 0.7);
+
+// Función auxiliar para construir una repisa dada su altura e Y
+function buildRepisaGroup(name, yTabla, yInf, yDiag, yVert) {
+    const group = new THREE.Group();
+    group.name = name;
+
+    // Tabla Principal
     const tabla = new THREE.Mesh(tablaGeo, maderaMat);
-    tabla.position.set(-0.359, 31.945, 53.969);
-    repisaGroup.add(tabla);
+    tabla.position.set(-0.359, yTabla, 53.969);
 
-    // Tabla inferior (más delgada, remate debajo de la principal) — arreglado: usaba tablaGeo por error
-    const tablainferiorGeo = new THREE.BoxGeometry(19.3, 0.31, 3.706);
+    // Remate Inferior
     const tablainferior = new THREE.Mesh(tablainferiorGeo, maderaMat);
-    tablainferior.position.set(-0.359, 31.29, 54.116);
-    repisaGroup.add(tablainferior);
+    tablainferior.position.set(-0.359, yInf, 54.116);
 
-    // Soportes en L — izquierdo y derecho, coordenadas absolutas (copia las tuyas de Studio aquí)
-    const brazoDiagonalGeo = new THREE.BoxGeometry(0.7, 0.7, 3.5); // rotado ~30° en X
-    const brazoDiagonalIzqui = new THREE.Mesh(brazoDiagonalGeo, soporteMat);
-    brazoDiagonalIzqui.position.set(6.605, 30.804, 54.034);
-    brazoDiagonalIzqui.rotation.x = THREE.MathUtils.degToRad(30); // <- AJUSTAR si tu ángulo real es otro
-    repisaGroup.add(brazoDiagonalIzqui);
+    group.add(tabla, tablainferior);
 
-    const brazoDiagonalDer = new THREE.Mesh(brazoDiagonalGeo, soporteMat);
-    brazoDiagonalDer.position.set(-7.323, 30.804, 54.034);
-    brazoDiagonalDer.rotation.x = THREE.MathUtils.degToRad(30); // <- AJUSTAR
-    repisaGroup.add(brazoDiagonalDer);
+    // Brazos Diagonales de Metal (Izquierda y Derecha)
+    const posDiagonales = [
+        [6.605, yDiag, 54.034], // Brazo Diagonal Izquierdo
+        [-7.323, yDiag, 54.034]  // Brazo Diagonal Derecho
+    ];
+    posDiagonales.forEach(([x, y, z]) => {
+        const brazo = new THREE.Mesh(brazoDiagonalGeo, soporteMat);
+        brazo.position.set(x, y, z);
+        brazo.rotation.x = THREE.MathUtils.degToRad(30);
+        group.add(brazo);
+    });
 
-    const brazoVertiGeo = new THREE.BoxGeometry(0.7, 1.982, 0.7);
-    const brazoVertiIzqui = new THREE.Mesh(brazoVertiGeo, soporteMat);
-    brazoVertiIzqui.position.set(6.605, 30.343, 55.619);
-    repisaGroup.add(brazoVertiIzqui);
+    // Brazos Verticales de Metal (Izquierda y Derecha)
+    const posVerticales = [
+        [6.605, yVert, 55.619], // Brazo Vertical Izquierdo
+        [-7.323, yVert, 55.619]  // Brazo Vertical Derecho
+    ];
+    posVerticales.forEach(([x, y, z]) => {
+        const brazo = new THREE.Mesh(brazoVertiGeo, soporteMat);
+        brazo.position.set(x, y, z);
+        group.add(brazo);
+    });
 
-    const brazoVertiDer = new THREE.Mesh(brazoVertiGeo, soporteMat);
-    brazoVertiDer.position.set(-7.323, 30.343, 55.619);
-    repisaGroup.add(brazoVertiDer);
+    // Recorrido para activar sombras en todas las piezas de la repisa
+    group.traverse((child) => {
+        if (child.isMesh) {
+            child.castShadow = true;
+            child.receiveShadow = true;
+        }
+    });
 
-    return repisaGroup;
+    return group;
 }
 
+// ---------------------------------------------------------------
+// REPISA SUPERIOR
+// ---------------------------------------------------------------
+export function createRepisaSuperior() {
+    return buildRepisaGroup("repisaSuperior", 31.945, 31.29, 30.804, 30.343);
+}
+
+// ---------------------------------------------------------------
+// REPISA INFERIOR
+// ---------------------------------------------------------------
 export function createRepisaInferior() {
-    const repisaGroup = new THREE.Group();
-    repisaGroup.name = "repisaInferior";
-
-    const tablaGeo = new THREE.BoxGeometry(19.7, 1, 4); // <- AJUSTAR con tus medidas reales
-    const tabla = new THREE.Mesh(tablaGeo, maderaMat);
-    tabla.position.set(-0.359, 24.568, 53.969); // <- AJUSTAR (más abajo que la superior)
-    repisaGroup.add(tabla);
-
-    const tablainferiorGeo = new THREE.BoxGeometry(19.3, 0.31, 3.706); // <- AJUSTAR
-    const tablainferior = new THREE.Mesh(tablainferiorGeo, maderaMat);
-    tablainferior.position.set(-0.359, 23.913, 54.116); // <- AJUSTAR
-    repisaGroup.add(tablainferior);
-
-    const brazoDiagonalGeo = new THREE.BoxGeometry(0.7, 0.7, 3.5); // <- AJUSTAR
-    const brazoDiagonalIzqui = new THREE.Mesh(brazoDiagonalGeo, soporteMat);
-    brazoDiagonalIzqui.position.set(6.605, 23.428, 54.034); // <- AJUSTAR
-    brazoDiagonalIzqui.rotation.x = THREE.MathUtils.degToRad(30); // <- AJUSTAR
-    repisaGroup.add(brazoDiagonalIzqui);
-
-    const brazoDiagonalDer = new THREE.Mesh(brazoDiagonalGeo, soporteMat);
-    brazoDiagonalDer.position.set(-7.323, 23.428, 54.034); // <- AJUSTAR
-    brazoDiagonalDer.rotation.x = THREE.MathUtils.degToRad(30); // <- AJUSTAR
-    repisaGroup.add(brazoDiagonalDer);
-
-    const brazoVertiGeo = new THREE.BoxGeometry(0.7, 1.982, 0.7); // <- AJUSTAR
-    const brazoVertiIzqui = new THREE.Mesh(brazoVertiGeo, soporteMat);
-    brazoVertiIzqui.position.set(6.605, 22.966, 55.619); // <- AJUSTAR
-    repisaGroup.add(brazoVertiIzqui);
-
-    const brazoVertiDer = new THREE.Mesh(brazoVertiGeo, soporteMat);
-    brazoVertiDer.position.set(-7.323, 22.966, 55.619); // <- AJUSTAR
-    repisaGroup.add(brazoVertiDer);
-
-    return repisaGroup;
+    return buildRepisaGroup("repisaInferior", 24.568, 23.913, 23.428, 22.966);
 }

@@ -1,4 +1,3 @@
-
 import * as THREE from 'three';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 
@@ -8,14 +7,14 @@ export function createRenderer(container) {
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-    // Sombras suaves (antes esto estaba duplicado en index.js, ahora vive acá)
+    // Sombras suaves
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
     // Esto es lo que hace que los colores cálidos del sol/fuego no se vean
     // "quemados" o planos, sino con el contraste tipo foto de la referencia
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.1; // subí/bajá esto si toda la escena se ve muy clara/oscura
+    renderer.toneMappingExposure = 1.5;
 
     renderer.outputColorSpace = THREE.SRGBColorSpace;
 

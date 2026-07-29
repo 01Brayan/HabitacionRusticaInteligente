@@ -1,13 +1,15 @@
+// ===============================================================
+// MUEBLE: CAMA Y CABECERA DE MADERA
+// ===============================================================
 import * as THREE from 'three';
-import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 export function createBed() {
     const bedGroup = new THREE.Group();
     const textureLoader = new THREE.TextureLoader();
-// ---------------------------------------------------------------
-    // TEXTURA DE MADERA (misma que buró/ropero/estantería)
+
     // ---------------------------------------------------------------
+    // MATERIAL DE MADERA (PBR)
     const maderaDiffuse = textureLoader.load('src/assets/textures/wood_dark_001/wood_dark_001_Color_2K.jpg');
     const maderaNormal  = textureLoader.load('src/assets/textures/wood_dark_001/wood_dark_001_Normal_2K.jpg');
     const maderaRough   = textureLoader.load('src/assets/textures/wood_dark_001/wood_dark_001_Roughness_2K.jpg');
@@ -22,116 +24,140 @@ export function createBed() {
     const maderaMat = new THREE.MeshStandardMaterial({
         map: maderaDiffuse,
         normalMap: maderaNormal,
-        normalScale: new THREE.Vector2(0.55, 0.55),
+        normalScale: new THREE.Vector2(1.0, 1.0), 
         roughnessMap: maderaRough,
         color: 0x3D2C1E,
-        roughness: 0.68,
+        roughness: 1,
     });
 
-    // Estructura base de la cama
+    const madederaClaraMat = new THREE.MeshStandardMaterial({
+        map: maderaDiffuse,
+        normalMap: maderaNormal,
+        normalScale: new THREE.Vector2(1.0, 1.0),
+        roughnessMap: maderaRough,
+        color: 0x6E5A3E, 
+        roughness: 1,
+    });
+
+    // ---------------------------------------------------------------
+    // ESTRUCTURA DE LA CAMA
+    // Base de la Cama
     const baseGeo = new THREE.BoxGeometry(20.75, 0.8, 25.1);
     const base = new THREE.Mesh(baseGeo, maderaMat);
     base.position.set(-0.308, 4.616, 41.805);
+
+    // Paneles Laterales (Izquierda y Derecha)
+    const panelLateralGeo = new THREE.BoxGeometry(0.7, 3.8, 24.5);
+    const posPanelesLat = [
+        [10.217, 4.216, 42.105], // Panel Lateral Izquierdo
+        [-10.833, 4.216, 42.105]  // Panel Lateral Derecho
+    ];
+    posPanelesLat.forEach(([x, y, z]) => {
+        const panel = new THREE.Mesh(panelLateralGeo, maderaMat);
+        panel.position.set(x, y, z);
+        bedGroup.add(panel);
+    });
+
     bedGroup.add(base);
-    //partes de la cabecera 
-    //============================================0
-    //cabecera interior
+
+    // ---------------------------------------------------------------
+    // CABECERA (Interior, Exterior, Marcos y Patas traseras)
+    // Cabecera Interior y Exterior
     const cabeceraInferiorGeo = new THREE.BoxGeometry(19, 8.423, 1);
     const cabeceraInferior = new THREE.Mesh(cabeceraInferiorGeo, maderaMat);
-    cabeceraInferior.position.set(-0.283, 9.711, 55.177); // Ajusta la posición de la cabecera
-    bedGroup.add(cabeceraInferior);
-    //cabecerza exterior
+    cabeceraInferior.position.set(-0.283, 9.711, 55.177);
+
     const cabeceraExteriorGeo = new THREE.BoxGeometry(15.472, 4.4, 0.3);
     const cabeceraExterior = new THREE.Mesh(cabeceraExteriorGeo, maderaMat);
-    cabeceraExterior.position.set(-0.315, 9.843, 54.777); // Ajusta la posición de la cabecera
-    bedGroup.add(cabeceraExterior);
-    // marco de cabecera exterior
-    //marco vertical
+    cabeceraExterior.position.set(-0.315, 9.843, 54.777);
+
+    bedGroup.add(cabeceraInferior, cabeceraExterior);
+
+    // Marcos de Cabecera (Verticales y Horizontales)
     const marcoVertiGeo = new THREE.BoxGeometry(1, 4.4, 1);
-    const marcoVertiIzquier = new THREE.Mesh(marcoVertiGeo, maderaMat);
-    marcoVertiIzquier.position.set(7.921, 9.843, 54.927); // Ajusta la posición de la cabecera
-    
-    const marcoVertiDer = new THREE.Mesh(marcoVertiGeo, maderaMat);
-    marcoVertiDer.position.set(-8.551, 9.843, 54.927); 
+    const posMarcosVert = [
+        [7.921, 9.843, 54.927], // Marco Vertical Izquierdo
+        [-8.551, 9.843, 54.927]  // Marco Vertical Derecho
+    ];
+    posMarcosVert.forEach(([x, y, z]) => {
+        const marco = new THREE.Mesh(marcoVertiGeo, madederaClaraMat);
+        marco.position.set(x, y, z);
+        bedGroup.add(marco);
+    });
 
-    //marco horizontal
     const marcoHorizontalGeo = new THREE.BoxGeometry(17.472, 1, 1);
-    const marcoHorizontalSuperior = new THREE.Mesh(marcoHorizontalGeo, maderaMat);
-    marcoHorizontalSuperior.position.set(-0.315, 12.543, 54.927); // Ajusta la posición de la cabecera
-    
-    const marcoHorizontalInferior = new THREE.Mesh(marcoHorizontalGeo, maderaMat);
-    marcoHorizontalInferior.position.set(-0.315, 7.143, 54.927); 
-    bedGroup.add(marcoHorizontalSuperior, marcoHorizontalInferior,marcoVertiIzquier, marcoVertiDer );
-     //patas de la cabecera
+    const posMarcosHoriz = [
+        [-0.315, 12.543, 54.927], // Marco Horizontal Superior
+        [-0.315, 7.143, 54.927]   // Marco Horizontal Inferior
+    ];
+    posMarcosHoriz.forEach(([x, y, z]) => {
+        const marco = new THREE.Mesh(marcoHorizontalGeo, madederaClaraMat);
+        marco.position.set(x, y, z);
+        bedGroup.add(marco);
+    });
+
+    // Patas de la Cabecera
     const patasVerticalesGeo = new THREE.BoxGeometry(1.7, 15, 1.7);
-    
-    const pataIzquierda = new THREE.Mesh(patasVerticalesGeo, maderaMat);
-    pataIzquierda.position.set(9.967, 7, 55.119);
-    const pataDerecha = new THREE.Mesh(patasVerticalesGeo, maderaMat);
-    pataDerecha.position.set(-10.533, 7, 55.119);
-    bedGroup.add(pataIzquierda, pataDerecha);
+    const posPatasCabecera = [
+        [9.967, 7, 55.119],  // Pata Cabecera Izquierda
+        [-10.533, 7, 55.119] // Pata Cabecera Derecha
+    ];
+    posPatasCabecera.forEach(([x, y, z]) => {
+        const pata = new THREE.Mesh(patasVerticalesGeo, maderaMat);
+        pata.position.set(x, y, z);
+        bedGroup.add(pata);
+    });
 
-
-    // Panel/falda LATERAL (nuevo — se ve en la foto, conecta las patas a los lados)
-    const panelLateralGeo = new THREE.BoxGeometry(0.7, 3.8, 24.5);
-    const panelLateralIzq = new THREE.Mesh(panelLateralGeo, maderaMat);
-    panelLateralIzq.position.set(10.217, 4.216, 42.105);
-    const panelLateralDer = new THREE.Mesh(panelLateralGeo, maderaMat);
-    panelLateralDer.position.set(-10.833, 4.216, 42.105);
-    bedGroup.add(panelLateralIzq, panelLateralDer);
-
-
-
-    //parte delantera de la cama
+    // ---------------------------------------------------------------
+    // PARTE DELANTERA DE LA CAMA (Patas y Marcos delanteros)
+    // Patas Delanteras
     const patasDelanterasGeo = new THREE.BoxGeometry(1.9, 8.2, 1.9);
-    const pataDelantera1 = new THREE.Mesh(patasDelanterasGeo, maderaMat);
-    pataDelantera1.position.set(9.817, 3.6, 28.905);
-    const pataDelantera2 = new THREE.Mesh(patasDelanterasGeo, maderaMat);
-    pataDelantera2.position.set(-10.433, 3.6, 28.905);
-    bedGroup.add(pataDelantera1, pataDelantera2);
+    const posPatasDelanteras = [
+        [9.817, 3.6, 28.905],  // Pata Delantera Izquierda
+        [-10.433, 3.6, 28.905] // Pata Delantera Derecha
+    ];
+    posPatasDelanteras.forEach(([x, y, z]) => {
+        const pata = new THREE.Mesh(patasDelanterasGeo, maderaMat);
+        pata.position.set(x, y, z);
+        bedGroup.add(pata);
+    });
 
-    //marco de la parte delantera
-    //marco superior
+    // Marco Delantero Superior e Inferior
     const marcoDelanteroSuperiorGeo = new THREE.BoxGeometry(18.854, 2.2, 1.2);
     const marcoDelantero = new THREE.Mesh(marcoDelanteroSuperiorGeo, maderaMat);
     marcoDelantero.position.set(-0.056, 4.733, 28.855);
-    bedGroup.add(marcoDelantero);
-    //marco inferior
+
     const marcoInferiorGeo = new THREE.BoxGeometry(19.004, 1.2, 0.8);
     const marcoInferior = new THREE.Mesh(marcoInferiorGeo, maderaMat);
     marcoInferior.position.set(0.019, 3.033, 28.475);
-    bedGroup.add(marcoInferior);
-//CARGAR EL NUEVO MODELO GLB
-const loader = new GLTFLoader();
-    
-    // Asegúrate de que esta ruta apunte a donde guardaste tu archivo
+
+    bedGroup.add(marcoDelantero, marcoInferior);
+
+    // ---------------------------------------------------------------
+    // 5. CARGA DEL MODELO 3D DEL COLCHÓN (GLTF)
+    const loader = new GLTFLoader();
     loader.load('src/assets/models/BedWhite1.glb', function (gltf) {
         const colchonImportado = gltf.scene;
-
-        // Hacer que el modelo proyecte y reciba sombras
         colchonImportado.traverse((child) => {
             if (child.isMesh) {
                 child.castShadow = true;
                 child.receiveShadow = true;
             }
         });
-
-        // Escala: Si está muy grande, pon 0.5 o 0.1. Si está pequeño, pon 2 o 3.
-        colchonImportado.scale.set(1, 1, 1); // <- AJUSTAR
-        
-        // Posición: Múevelo hacia arriba (Y) para que descanse sobre las tablas
-        colchonImportado.position.set(0, 1, 0); // <- AJUSTAR
-        
-        // Si necesitas rotarlo para que apunte al lado correcto:
-        // colchonImportado.rotation.y = Math.PI / 2; // Rota 90 grados
-
+        colchonImportado.scale.set(1, 1, 1);
+        colchonImportado.position.set(0, 1, 0);
         bedGroup.add(colchonImportado);
-
     }, undefined, function (error) {
-        console.error('Ups, hubo un error cargando el modelo:', error);
+        console.error('Error cargando el colchón:', error);
     });
 
+    // todos los Mesh de la cama proyecten y reciban sombras
+    bedGroup.traverse((child) => {
+        if (child.isMesh) {
+            child.castShadow = true;
+            child.receiveShadow = true;
+        }
+    });
 
-
-    return bedGroup; // ¡MUY IMPORTANTE RETORNARLO!
+    return bedGroup;
 }

@@ -1,3 +1,6 @@
+// ===============================================================
+// ROPERO DE MADERA
+// ===============================================================
 import * as THREE from 'three';
 
 export function createRopero() {
@@ -5,7 +8,7 @@ export function createRopero() {
     const textureLoader = new THREE.TextureLoader();
 
     // ---------------------------------------------------------------
-    // TEXTURA DE MADERA (misma que el buró, wood_dark_001)
+    // MATERIALES (Madera PBR + Manijas de Bronce)
     // ---------------------------------------------------------------
     const maderaDiffuse = textureLoader.load('src/assets/textures/wood_dark_001/wood_dark_001_Color_2K.jpg');
     const maderaNormal  = textureLoader.load('src/assets/textures/wood_dark_001/wood_dark_001_Normal_2K.jpg');
@@ -15,138 +18,151 @@ export function createRopero() {
     [maderaDiffuse, maderaNormal, maderaRough].forEach((tex) => {
         tex.wrapS = THREE.RepeatWrapping;
         tex.wrapT = THREE.RepeatWrapping;
-        tex.repeat.set(1, 2); // el ropero es más alto que el buró, un poco más de repetición vertical
+        tex.repeat.set(1, 2); // Repetición vertical para mueble alto
     });
 
     const maderaMat = new THREE.MeshStandardMaterial({
         map: maderaDiffuse,
         normalMap: maderaNormal,
-        normalScale: new THREE.Vector2(0.3, 0.3),
+        normalScale: new THREE.Vector2(1.0, 1.0), // relieve marcado para madera rústica realista
         roughnessMap: maderaRough,
-        color: 0x2E2418, // más claro que negro puro, para que se vea el grano (antes ~0x1A1408)
-        roughness: 0.6,
+        color: 0x2E2418,
+        roughness: 1,
     });
 
-    // Metal de las manijas -> bronce oscuro, NO gris claro (antes muy contrastante)
     const manijaMat = new THREE.MeshStandardMaterial({
-        color: 0x7A6248,
-        metalness: 0.8,
-        roughness: 0.35,
+        color: 0x7A6248, // Bronce oscuro
+        metalness: 0.95, // --esto fue modificado: aumentado a 0.95 para metal real
+        roughness: 0.2,  // --esto fue modificado: disminuido a 0.2 para reflejo brillante pulido
     });
 
-
-
-    // --- TAPA SUPERIOR 
-    const tapaGeoSup = new THREE.BoxGeometry(7.2, 1.511, 19.2); // más ancha/profunda que el cuerpo <- AJUSTAR
+    // ---------------------------------------------------------------
+    // TAPAS Y ESTRUCTURA DEL MUEBLE
+    // ---------------------------------------------------------------
+    // Tapa Superior
+    const tapaGeoSup = new THREE.BoxGeometry(7.2, 1.511, 19.2);
     const tapaSuperior = new THREE.Mesh(tapaGeoSup, maderaMat);
-    tapaSuperior.position.set(-41.102, 26.745, 39.124); // <- AJUSTAR
-    roperoGroup.add(tapaSuperior);
+    tapaSuperior.position.set(-41.102, 26.745, 39.124);
 
-    // --- TAPA INFERIOR 
-    const tapaGeoInf = new THREE.BoxGeometry(7.2, 1.3, 17.759); // más ancha/profunda que el cuerpo <- AJUSTAR
+    // Tapa Inferior
+    const tapaGeoInf = new THREE.BoxGeometry(7.2, 1.3, 17.759);
     const tapaInferior = new THREE.Mesh(tapaGeoInf, maderaMat);
-    tapaInferior.position.set(-41.102, 1.255, 39.73); // <- AJUSTAR
-    roperoGroup.add(tapaInferior);
+    tapaInferior.position.set(-41.102, 1.255, 39.73);
 
-    // --- TAPA TRASERA 
-    const tapaGeoTrasera = new THREE.BoxGeometry(0.744, 24.084, 14.4); // más ancha/profunda que el cuerpo <- AJUSTAR
+    // Tapa Trasera (Respaldo)
+    const tapaGeoTrasera = new THREE.BoxGeometry(0.744, 24.084, 14.4);
     const tapaTrasera = new THREE.Mesh(tapaGeoTrasera, maderaMat);
-    tapaTrasera.position.set(-44.33, 13.947, 39.124); // <- AJUSTAR
-    roperoGroup.add(tapaTrasera);
+    tapaTrasera.position.set(-44.33, 13.947, 39.124);
 
-    // --- TAPA IZQUIERDA 
-    const tapaGeoIzq = new THREE.BoxGeometry(2.4, 25.301, 0.502); // más ancha/profunda que el cuerpo <- AJUSTAR
-    const tapaIzquierda = new THREE.Mesh(tapaGeoIzq, maderaMat);
-    tapaIzquierda.position.set(-41.102, 13.338, 48.473); // <- AJUSTAR
-    roperoGroup.add(tapaIzquierda);
+    // Tapas Laterales (Izquierda y Derecha)
+    const posLaterales = [
+        { geo: new THREE.BoxGeometry(2.4, 25.301, 0.502), pos: [-41.102, 13.338, 48.473] }, // Tapa Izquierda
+        { geo: new THREE.BoxGeometry(2.4, 25.689, 0.502), pos: [-41.102, 13.532, 29.775] }  // Tapa Derecha
+    ];
+    posLaterales.forEach(({ geo, pos: [x, y, z] }) => {
+        const tapa = new THREE.Mesh(geo, maderaMat);
+        tapa.position.set(x, y, z);
+        roperoGroup.add(tapa);
+    });
 
-    // --- TAPA DERECHA 
-    const tapaGeoDer = new THREE.BoxGeometry(2.4, 25.689, 0.502); // más ancha/profunda que el cuerpo <- AJUSTAR
-    const tapaDerecha = new THREE.Mesh(tapaGeoDer, maderaMat);
-    tapaDerecha.position.set(-41.102, 13.532, 29.775); // <- AJUSTAR
-    roperoGroup.add(tapaDerecha);
-
-    // --- PUERTA
-    const puertaGeo = new THREE.BoxGeometry(0.358, 24.084, 12); // <- AJUSTAR
+    // Puerta Principal
+    const puertaGeo = new THREE.BoxGeometry(0.358, 24.084, 12);
     const puerta = new THREE.Mesh(puertaGeo, maderaMat);
-    puerta.position.set(-38.215, 13.947, 39.124); // <- AJUSTAR
-    roperoGroup.add(puerta);
+    puerta.position.set(-38.215, 13.947, 39.124);
 
-    // --- PANEL HUNDIDO  ---
-    const panelHundidoVerticalGeo = new THREE.BoxGeometry(0.372, 24.084, 1.2); // más chico que la puerta, sobresale poco en Z <- AJUSTAR
-    const panelHundidoHorizontalGeo = new THREE.BoxGeometry(6.128, 1.3, 4.713); // más chico que la puerta, sobresale poco en Y <- AJUSTAR
-    //PANEL HUNDIDO EN EL LADO IZQUIERDO DEL ROPERO
-    const panelHundidoIzq = new THREE.Mesh(panelHundidoVerticalGeo, maderaMat);
-    panelHundidoIzq.position.set(-38.016, 13.947, 45.724); // <- AJUSTAR
-    roperoGroup.add(panelHundidoIzq);
+    roperoGroup.add(tapaSuperior, tapaInferior, tapaTrasera, puerta);
 
-    const panelHundidoDer = new THREE.Mesh(panelHundidoVerticalGeo, maderaMat);
-    panelHundidoDer.position.set(-38.016, 13.947, 39.811); // <- AJUSTAR
-    roperoGroup.add(panelHundidoDer);
+    // ---------------------------------------------------------------
+    // PANELES HUNDIDOS DE DECORACIÓN (Verticales y Horizontales)
+    // ---------------------------------------------------------------
+    // Paneles Verticales (Lado Izquierdo y Lado Derecho)
+    const panelVerticalGeo = new THREE.BoxGeometry(0.372, 24.084, 1.2);
+    const posPanelesVert = [
+        [-38.016, 13.947, 45.724], // Izquierda - Panel Izq
+        [-38.016, 13.947, 39.811], // Izquierda - Panel Der
+        [-38.016, 13.947, 38.511], // Derecha - Panel Izq
+        [-38.016, 13.947, 32.524]  // Derecha - Panel Der
+    ];
+    posPanelesVert.forEach(([x, y, z]) => {
+        const panel = new THREE.Mesh(panelVerticalGeo, maderaMat);
+        panel.position.set(x, y, z);
+        roperoGroup.add(panel);
+    });
 
-    const panelHundidoHorizontalSup = new THREE.Mesh(panelHundidoHorizontalGeo, maderaMat);
-    panelHundidoHorizontalSup.position.set(-40.894, 25.339, 42.768);
-    roperoGroup.add(panelHundidoHorizontalSup);
+    // Paneles Horizontales (Superiores e Inferiores)
+    const panelHorizontalGeo = new THREE.BoxGeometry(6.128, 1.3, 4.713);
+    const posPanelesHoriz = [
+        [-40.894, 25.339, 42.768], // Izquierda - Superior
+        [-40.894, 2.555, 42.768],  // Izquierda - Inferior
+        [-40.894, 25.339, 35.518], // Derecha - Superior
+        [-40.894, 2.555, 35.518]   // Derecha - Inferior
+    ];
+    posPanelesHoriz.forEach(([x, y, z]) => {
+        const panel = new THREE.Mesh(panelHorizontalGeo, maderaMat);
+        panel.position.set(x, y, z);
+        roperoGroup.add(panel);
+    });
 
-    const panelHundidoHorizontalInf = new THREE.Mesh(panelHundidoHorizontalGeo, maderaMat);
-    panelHundidoHorizontalInf.position.set(-40.894, 2.555, 42.768);
-    roperoGroup.add(panelHundidoHorizontalInf);
+    // ---------------------------------------------------------------
+    // MANIJAS DE LAS PUERTAS (Cilindros verticales)
+    // ---------------------------------------------------------------
+    const manijaGeo = new THREE.CylinderGeometry(0.2, 0.2, 4, 12);
+    const posManijas = [
+        [-37.502, 12.911, 39.68], // Manija Izquierda
+        [-37.502, 12.911, 38.516] // Manija Derecha
+    ];
+    posManijas.forEach(([x, y, z]) => {
+        const manija = new THREE.Mesh(manijaGeo, manijaMat);
+        manija.position.set(x, y, z);
+        roperoGroup.add(manija);
+    });
 
-    // --- MANIJA IZQUIERDA (cilindro VERTICAL, no rotado como el del buró) ---
-    const manijaIzqGeo = new THREE.CylinderGeometry(0.2, 0.2, 4, 12); // radio, radio, largo, segmentos <- AJUSTAR
-    const manijaIzq = new THREE.Mesh(manijaIzqGeo, manijaMat);
-    // sin rotación: el cilindro por defecto ya es vertical (eje Y), correcto para manija de puerta
-    manijaIzq.position.set(-37.502, 12.911, 39.68); // <- AJUSTAR, cerca del borde central de la puerta
-    roperoGroup.add(manijaIzq);
+    // ---------------------------------------------------------------
+    // PIES / PATAS DEL ROPERO
+    // ---------------------------------------------------------------
+    // Patas Traseras
+    const pieTraseroGeo = new THREE.BoxGeometry(2.4, 28, 2.4);
+    const posPiesTraseros = [
+        [-43.502, 13.5, 47.524], // Pie Trasero Izquierdo
+        [-43.502, 13.5, 30.724]  // Pie Trasero Derecho
+    ];
+    posPiesTraseros.forEach(([x, y, z]) => {
+        const pie = new THREE.Mesh(pieTraseroGeo, maderaMat);
+        pie.position.set(x, y, z);
+        roperoGroup.add(pie);
+    });
 
-    //PANEL HUNDIDO EN EL LADO DERECHO DEL ROPERO
-    const panelHundidoIzqDer = new THREE.Mesh(panelHundidoVerticalGeo, maderaMat);
-    panelHundidoIzqDer.position.set(-38.016, 13.947, 38.511); // <- AJUSTAR
-    roperoGroup.add(panelHundidoIzqDer);
+    // Patas Frontales
+    const pieFrontalGeo = new THREE.BoxGeometry(2.4, 28, 1.2);
+    const posPiesFrontales = [
+        [-38.702, 13.5, 48.124], // Pie Frontal Izquierdo
+        [-38.702, 13.5, 30.124]  // Pie Frontal Derecho
+    ];
+    posPiesFrontales.forEach(([x, y, z]) => {
+        const pie = new THREE.Mesh(pieFrontalGeo, maderaMat);
+        pie.position.set(x, y, z);
+        roperoGroup.add(pie);
+    });
 
-    const panelHundidoDerDer = new THREE.Mesh(panelHundidoVerticalGeo, maderaMat);
-    panelHundidoDerDer.position.set(-38.016, 13.947, 32.524); // <- AJUSTAR
-    roperoGroup.add(panelHundidoDerDer);
+    // Patas Frontales Delgadas (Detalle extra)
+    const pieDelgadoGeo = new THREE.BoxGeometry(0.7, 26.489, 1.2);
+    const posPiesDelgados = [
+        [-37.852, 12.745, 46.924], // Pie Delgado Izquierdo
+        [-37.852, 12.745, 31.324]  // Pie Delgado Derecho
+    ];
+    posPiesDelgados.forEach(([x, y, z]) => {
+        const pie = new THREE.Mesh(pieDelgadoGeo, maderaMat);
+        pie.position.set(x, y, z);
+        roperoGroup.add(pie);
+    });
 
-    const panelHundidoHorizontalSupDer = new THREE.Mesh(panelHundidoHorizontalGeo, maderaMat);
-    panelHundidoHorizontalSupDer.position.set(-40.894, 25.339, 35.518);
-    roperoGroup.add(panelHundidoHorizontalSupDer);
+    // Recorrido para activar sombras proyectadas y recibidas en el ropero
+    roperoGroup.traverse((child) => {
+        if (child.isMesh) {
+            child.castShadow = true;
+            child.receiveShadow = true;
+        }
+    });
 
-    const panelHundidoHorizontalInfDer = new THREE.Mesh(panelHundidoHorizontalGeo, maderaMat);
-    panelHundidoHorizontalInfDer.position.set(-40.894, 2.555, 35.518);
-    roperoGroup.add(panelHundidoHorizontalInfDer);
-
-    // --- MANIJA DERECHA ---
-    const manijaDerGeo = new THREE.CylinderGeometry(0.2, 0.2, 4, 12); // <- AJUSTAR
-    const manijaDer = new THREE.Mesh(manijaDerGeo, manijaMat);
-    manijaDer.position.set(-37.502, 12.911, 38.516); // <- AJUSTAR
-    roperoGroup.add(manijaDer);
-
-    // --- PIES (4, más chicos que las patas del buró, este mueble es más pesado/estático) ---
-    const pieTraseroGeo = new THREE.BoxGeometry(2.4, 28, 2.4); // <- AJUSTAR
-    const pieTraseroIzquierdo = new THREE.Mesh(pieTraseroGeo, maderaMat);
-    pieTraseroIzquierdo.position.set(-43.502, 13.5, 47.524);
-    roperoGroup.add(pieTraseroIzquierdo);
-
-    const pieTraseroDerecho = new THREE.Mesh(pieTraseroGeo, maderaMat);
-    pieTraseroDerecho.position.set(-43.502, 13.5, 30.724);
-    roperoGroup.add(pieTraseroDerecho);
-
-    const pieFrontalGeo = new THREE.BoxGeometry(2.4, 28, 1.2); // <- AJUSTAR
-    const pieFrontalIzquierdo = new THREE.Mesh(pieFrontalGeo, maderaMat);
-    pieFrontalIzquierdo.position.set(-38.702, 13.5, 48.124);
-    roperoGroup.add(pieFrontalIzquierdo);
-    const pieFrontalDerecho = new THREE.Mesh(pieFrontalGeo, maderaMat);
-    pieFrontalDerecho.position.set(-38.702, 13.5, 30.124);
-    roperoGroup.add(pieFrontalDerecho);
-
-    const pieFrontalDelgado = new THREE.BoxGeometry(0.7, 26.489, 1.2);
-    const pieFrontalDelgadoIzquierdo = new THREE.Mesh(pieFrontalDelgado, maderaMat);
-    pieFrontalDelgadoIzquierdo.position.set(-37.852, 12.745, 46.924);
-    roperoGroup.add(pieFrontalDelgadoIzquierdo);
-    const pieFrontalDelgadoDerecho = new THREE.Mesh(pieFrontalDelgado, maderaMat);
-    pieFrontalDelgadoDerecho.position.set(-37.852, 12.745, 31.324);
-    roperoGroup.add(pieFrontalDelgadoDerecho);
-
-    return roperoGroup; // ¡MUY IMPORTANTE RETORNARLO!
+    return roperoGroup;
 }

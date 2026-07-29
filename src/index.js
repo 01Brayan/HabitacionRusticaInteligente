@@ -1,10 +1,12 @@
 import { createScene } from './core/SceneManager.js' ;
 import { createCamera } from './core/CameraManager.js';
-import { createRenderer } from './core/RendererManager.js';
+import { createRenderer , applyEnvironment} from './core/RendererManager.js';
 import { createLights } from './lights/Lights.js';
+import { createTimeGUI } from './ui/TimeGUI.js';
+
 import { setupResize } from './utils/ResizeHandler.js';
 import { startAnimation } from './animations/AnimationLoop.js';
-//crear el diseño del cielo
+//crear el diseno del cielo
 import {createSkybox} from './objects/Skybox.js'
 
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
@@ -44,10 +46,9 @@ import { createCaja } from './objects/furniture/Caja.js';
 import { createBarril } from './objects/furniture/Barril.js';
 import { createRepisaInferior, createRepisaSuperior } from './objects/furniture/Repisa.js';
 
-//Import del editor 3D
-import { Editor3D } from './editor/Editor3D.js';
 //import de las decoraciones
 import { createDecorations } from './objects/decorations/Decorations.js';
+import { applyLayout } from './utils/LayoutLoader.js';
 
 
 // CONTENEDOR
@@ -56,18 +57,16 @@ const container = document.getElementById('container');
 // ESCENA
 const scene = createScene();
 
-// CÁMARA
+// CAMARA
 const camera = createCamera();
 
 // RENDERER
 const renderer = createRenderer(container);
+applyEnvironment(scene, renderer);
 //CONTROLES
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 controls.dampingFactor = 0.05;
-
-//editor 3D
-const editor = new Editor3D(scene, camera, renderer, controls);
 
 // AGREGAR ENTORNO (SKYBOX)
 const skybox = createSkybox();
@@ -83,67 +82,67 @@ scene.add(sueloExterior.group);
 
 // AGREGAR CAMA
 const bed = createBed();
-bed.position.set(0, 0,-1); // Posición de la cama en la habitación
+bed.position.set(0, 0,-1);
 scene.add(bed);
 
 const mesaDeNoche = createMesaDeNoche();
-mesaDeNoche.position.set(0,0,-1); // la posición junto a la cama
+mesaDeNoche.position.set(0,0,-1);
 scene.add(mesaDeNoche);
 
 const mesaDeNoche2 = createMesaDeNoche();
-mesaDeNoche2.position.set(-34.5,0,-1); // la posición junto a la cama
+mesaDeNoche2.position.set(-34.5,0,-1);
 scene.add(mesaDeNoche2);
 
 const ropero = createRopero();
-ropero.position.set(0,0,0); // la posición junto a la cama
+ropero.position.set(0,0,0);
 scene.add(ropero);
 
 const estanteria = createEstanteria();
-estanteria.position.set(0,0,0); // la posición junto a la cama
+estanteria.position.set(0,0,0);
 scene.add(estanteria);
 
 const comoda = createComoda();
-comoda.position.set(0,0,0); // la posición junto a la cama
+comoda.position.set(0,0,0);
 scene.add(comoda);
 
 const chiminea = createChimenea();
-chiminea.position.set(0,0,0); // la posición junto a la cama
+chiminea.position.set(0,0,0);
 scene.add(chiminea);
 
 const mesacentro = createMesaCentro();
-mesacentro.position.set(0,0,0); // la posición junto a la cama
+mesacentro.position.set(0,0,0);
 scene.add(mesacentro);
 
 const sofa = createSofa();
-sofa.position.set(0,0,0); // la posición junto a la cama
+sofa.position.set(0,0,0);
 scene.add(sofa);
 
 const tapeteblanco = createTapeteBlanco();
-tapeteblanco.position.set(0,0,0); // la posición junto a la cama
+tapeteblanco.position.set(0,0,0);
 scene.add(tapeteblanco);
 
 const tapeterojo= createTapeteRojo();
-tapeterojo.position.set(0,0,0); // la posición junto a la cama
+tapeterojo.position.set(0,0,0);
 scene.add(tapeterojo);
 
 const cajademadera= createCaja();
-cajademadera.position.set(0,0,0); // la posición junto a la cama
+cajademadera.position.set(0,0,0);
 scene.add(cajademadera);
 
 const barril= createBarril();
-barril.position.set(0,0,0); // la posición junto a la cama
+barril.position.set(0,0,0);
 scene.add(barril);
 
 const repisa = createRepisaSuperior();
-repisa.position.set(0,0,-1); // la posición junto a la cama
+repisa.position.set(0,0,-1);
 scene.add(repisa);
 
 const repisainf = createRepisaInferior();
-repisainf.position.set(0,0,-1); // la posición junto a la cama
+repisainf.position.set(0,0,-1);
 scene.add(repisainf);
 // AGREGAR PARED TRASERA
 const wallBack = createWallBack();
-wallBack.position.set(0, 0, -1); // La mandas al fondo de la cabaña
+wallBack.position.set(0, 0, -1);
 scene.add(wallBack);
 //AGREGAR PARED IZQUIERDA
 const wallLeft = createWallLeft();
@@ -159,7 +158,21 @@ const roof = createRoof();
 roof.position.set(0, 0, 0);
 scene.add(roof);
 // LUCES
-createLights(scene);
+const lights = createLights(scene);
+
+// GUI de hora del dia
+const gui = createTimeGUI({
+    min: 5,
+    max: 20,
+    initial: 7,
+    onChange: (hour) => {
+        lights.setTime(hour);
+    },
+});
+document.body.appendChild(gui.element);
+
+
+
 
 // EFECTOS DE CLIMA
 const lluviaEffect = createLluviaEffect();
@@ -324,7 +337,7 @@ setClimate(null);
 // RESPONSIVE
 setupResize(camera, renderer);
 
-// Nombres para que saveLayout/loadLayout los identifique correctamente
+// Asignar nombres para que layout.json pueda ubicar cada objeto
 bed.name = 'bed';
 mesaDeNoche.name = 'mesaDeNoche';
 mesaDeNoche2.name = 'mesaDeNoche2';
@@ -345,28 +358,14 @@ repisainf.name = 'repisainf';
 const decorations = await createDecorations();
 scene.add(decorations);
 
-console.log('Objetos en decorations:', decorations.children.map(o => o.name));
-
-editor.add(
+// Aplicar posiciones guardadas en layout.json
+const allObjects = [
     bed, mesaDeNoche, mesaDeNoche2, ropero, estanteria, comoda,
     chiminea, mesacentro, sofa, tapeteblanco, tapeterojo,
     cajademadera, barril, repisa, repisainf,
     ...decorations.children
-);
+];
+await applyLayout('src/assets/layout.json', allObjects);
 
-// Carga el layout guardado (si existe) — debe ir DESPUÉS de editor.add()
-await editor.loadLayoutFromFile('src/assets/layout.json');
-
-// ANIMACIÓN
+// ANIMACION
 startAnimation(renderer, scene, camera, controls, climateUpdaters);
-
-// DEBUG: exponer datos para inspección rápida en el navegador
-window.__debugScene = {
-    scene,
-    camera,
-    renderer,
-    controls,
-    lluviaEffect,
-    nieveEffect,
-    neblinaEffect,
-};

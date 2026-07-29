@@ -41,7 +41,7 @@ export function createWallWindow() {
     const wallMat = new THREE.MeshStandardMaterial({
         map: paredDiffuse,
         normalMap: paredNormal,
-        normalScale: new THREE.Vector2(0.4, 0.4),
+        normalScale: new THREE.Vector2(1.0, 1.0),
         roughnessMap: paredRough,
         aoMap: paredAO,
         color: 0x5C4530,
@@ -52,7 +52,7 @@ export function createWallWindow() {
     const marcoMat = new THREE.MeshStandardMaterial({
         map: maderaDiffuse,
         normalMap: maderaNormal,
-        normalScale: new THREE.Vector2(0.4, 0.4),
+        normalScale: new THREE.Vector2(1.0, 1.0),
         roughnessMap: maderaRough,
         aoMap: maderaAO,
         color: 0x4A3220,
@@ -63,7 +63,7 @@ export function createWallWindow() {
     const marcoHojaMat = new THREE.MeshStandardMaterial({
         map: maderaDiffuse,
         normalMap: maderaNormal,
-        normalScale: new THREE.Vector2(0.4, 0.4),
+        normalScale: new THREE.Vector2(1.0, 1.0),
         roughnessMap: maderaRough,
         aoMap: maderaAO,
         color: 0x3A2718,
@@ -138,7 +138,7 @@ export function createWallWindow() {
     hojaIzqGroup.name = "ventanaIzquierda";
     hojaIzqGroup.position.set(-45.384, 21.43, -33.637);
 
-    const vidrioIzq = new THREE.Mesh(new THREE.BoxGeometry(0.5, 9.288, 7.5), vidrioMat);
+    const vidrioIzq = new THREE.Mesh(new THREE.BoxGeometry(0.25, 9.288, 7.5), vidrioMat);
     vidrioIzq.position.set(-0.75, 0.042, -4.348);
     hojaIzqGroup.add(vidrioIzq);
 
@@ -181,7 +181,7 @@ export function createWallWindow() {
     hojaDerGroup.name = "ventanaDerecha";
     hojaDerGroup.position.set(-45.384, 21.43, -50.584);
 
-    const vidrioDer = new THREE.Mesh(new THREE.BoxGeometry(0.5, 9.288, 7.5), vidrioMat);
+    const vidrioDer = new THREE.Mesh(new THREE.BoxGeometry(0.25, 9.288, 7.5), vidrioMat);
     vidrioDer.position.set(-0.75, 0.042, 4.386);
     hojaDerGroup.add(vidrioDer);
 
@@ -216,6 +216,18 @@ export function createWallWindow() {
     hojaDerGroup.add(cruzDer);
 
     wallGroup.add(hojaDerGroup);
+
+    // --esto fue modificado: Recorrido para activar sombras en maderas, evitando que el vidrio transparente proyecte sombra opaca
+    wallGroup.traverse((child) => {
+        if (child.isMesh) {
+            if (child.material === vidrioMat) {
+                child.castShadow = false;
+            } else {
+                child.castShadow = true;
+            }
+            child.receiveShadow = true;
+        }
+    });
 
     return wallGroup;
 }

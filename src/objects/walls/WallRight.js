@@ -1,3 +1,6 @@
+// ===============================================================
+// PARED: PARED LATERAL DERECHA CON VENTANA FIJA Y PILARES
+// ===============================================================
 import * as THREE from 'three';
 import { createWallWindowStatic } from './WallWindowStatic.js';
 
@@ -6,7 +9,7 @@ export function createWallRight() {
     const textureLoader = new THREE.TextureLoader();
 
     // ---------------------------------------------------------------
-    // 1. PARED (tablones) -> plank_wall
+    // 1. CARGA DE TEXTURAS (Pared de Tablones, Madera Rústica y Piedra)
     // ---------------------------------------------------------------
     const paredDiffuse = textureLoader.load('src/assets/textures/plank_wall/plank_wall_diff_2k.jpg');
     const paredNormal  = textureLoader.load('src/assets/textures/plank_wall/plank_wall_nor_gl_2k.jpg');
@@ -17,12 +20,9 @@ export function createWallRight() {
     [paredDiffuse, paredNormal, paredRough, paredAO].forEach((tex) => {
         tex.wrapS = THREE.RepeatWrapping;
         tex.wrapT = THREE.RepeatWrapping;
-        tex.repeat.set(1, 3); // mismo ajuste que en WallLeft.js, para que combinen
+        tex.repeat.set(1, 3); 
     });
 
-    // ---------------------------------------------------------------
-    // 2. MADERA (pilares, vigas horizontales, soportes) -> rough_wood
-    // ---------------------------------------------------------------
     const maderaDiffuse = textureLoader.load('src/assets/textures/rough_wood/rough_wood_diff_2k.jpg');
     const maderaNormal  = textureLoader.load('src/assets/textures/rough_wood/rough_wood_nor_gl_2k.jpg');
     const maderaRough   = textureLoader.load('src/assets/textures/rough_wood/rough_wood_rough_2k.jpg');
@@ -36,10 +36,6 @@ export function createWallRight() {
         tex.center.set(0.5, 0.5);
     });
     
-    // ---------------------------------------------------------------
-    // 3. PIEDRA (base de columnas) -> stone
-    //    (esto era lo que faltaba, causaba el ReferenceError)
-    // ---------------------------------------------------------------
     const piedraDiffuse = textureLoader.load('src/assets/textures/stone/stone_diff_2k.jpg');
     const piedraNormal  = textureLoader.load('src/assets/textures/stone/stone_nor_gl_2k.jpg');
     const piedraRough   = textureLoader.load('src/assets/textures/stone/stone_rough_2k.jpg');
@@ -49,16 +45,14 @@ export function createWallRight() {
     [piedraDiffuse, piedraNormal, piedraRough, piedraAO].forEach((tex) => {
         tex.wrapS = THREE.RepeatWrapping;
         tex.wrapT = THREE.RepeatWrapping;
-        tex.repeat.set(1, 1); // piezas chicas, poca repetición para que las piedras se vean a escala real
+        tex.repeat.set(1, 1); 
     });
 
-    // ---------------------------------------------------------------
-    // MATERIALES
-    // ---------------------------------------------------------------
+    // Materiales
     const wallMat = new THREE.MeshStandardMaterial({
         map: paredDiffuse,
         normalMap: paredNormal,
-        normalScale: new THREE.Vector2(0.4, 0.4),
+        normalScale: new THREE.Vector2(1.0, 1.0),
         roughnessMap: paredRough,
         aoMap: paredAO,
         color: 0x5C4530,
@@ -68,83 +62,75 @@ export function createWallRight() {
     const pilaresMat = new THREE.MeshStandardMaterial({
         map: maderaDiffuse,
         normalMap: maderaNormal,
-        normalScale: new THREE.Vector2(0.4, 0.4),
+        normalScale: new THREE.Vector2(1.0, 1.0),
         roughnessMap: maderaRough,
         aoMap: maderaAO,
-        color: 0x3A2718, // columnas
+        color: 0x3A2718, 
         roughness: 1.0,
     });
 
     const vigasHorizontalesMat = new THREE.MeshStandardMaterial({
         map: maderaDiffuse,
         normalMap: maderaNormal,
-        normalScale: new THREE.Vector2(0.4, 0.4),
         roughnessMap: maderaRough,
         aoMap: maderaAO,
-        color: 0x4A3220, // vigas
+        color: 0x4A3220, 
         roughness: 1.0,
     });
 
     const baseColumnaMat = new THREE.MeshStandardMaterial({
-    map: piedraDiffuse,       // MISMA imagen base que wallMat (ya cargada, no gastas memoria extra)
-    normalMap: piedraNormal,
-    normalScale: new THREE.Vector2(0.4, 0.4),
-    roughnessMap: piedraRough,
-    aoMap: piedraAO,
-    color: 0x5C554A,           // tinte propio, más gris/apagado que el 0x6E6259 de la pared
-    roughness: 1.0,
+        map: piedraDiffuse,       
+        normalMap: piedraNormal,
+        normalScale: new THREE.Vector2(0.4, 0.4),
+        roughnessMap: piedraRough,
+        aoMap: piedraAO,
+        color: 0x5C554A,           
+        roughness: 1.0,
     });
 
-    //PAREDES DEL FONDO HACIA ADELANTE
+    // ---------------------------------------------------------------
+    // 2. PAREDES DE TABLONES ESTÁTICAS Y VENTANA MODULAR FIJA
+    // ---------------------------------------------------------------
     const wallGeo = new THREE.BoxGeometry(3, 33, 22);
     wallGeo.setAttribute('uv2', new THREE.BufferAttribute(wallGeo.attributes.uv.array, 2));
 
-    const wall1 = new THREE.Mesh(wallGeo, wallMat);
-    wall1.position.set(45.488, 16, 38.969);
-    wallRightGroup.add(wall1);
+    // Paredes Estáticas (Pared 1, Pared 2 y Pared 4)
+    const posParedesEstaticas = [
+        [45.488, 16, 38.969], // Pared 1 (Fondo)
+        [45.488, 16, 11.969], // Pared 2
+        [45.488, 16, -42.031] // Pared 4 (Frente)
+    ];
+    posParedesEstaticas.forEach(([x, y, z]) => {
+        const wall = new THREE.Mesh(wallGeo, wallMat);
+        wall.position.set(x, y, z);
+        wallRightGroup.add(wall);
+    });
 
-    const wall2 = new THREE.Mesh(wallGeo, wallMat);
-    wall2.position.set(45.488, 16, 11.969);
-    wallRightGroup.add(wall2);
-
-    //const wall3 = new THREE.Mesh(wallGeo, wallMat);
-    // wall3.position.set(31.5, 12.5, -19);
-    //wallRightGroup.add(wall3);
-
-    //pared con ventana importado de wallwindowstatic.js
+    // Pared con ventana modular fija (Importado de WallWindowStatic.js)
     const paredConVentanaFija = createWallWindowStatic();
     paredConVentanaFija.position.set(0, 0, 0);
     wallRightGroup.add(paredConVentanaFija);
 
-    const wall4 = new THREE.Mesh(wallGeo, wallMat);
-    wall4.position.set(45.488, 16, -42.031);
-    wallRightGroup.add(wall4);
-
-    //Pilares desde el fondo hacia adelante
+    // ---------------------------------------------------------------
+    // 3. PILARES / COLUMNAS DE MADERA DESDE EL FONDO HACIA ADELANTE
+    // ---------------------------------------------------------------
     const pillarGeo = new THREE.BoxGeometry(7.5, 33, 5);
     pillarGeo.setAttribute('uv2', new THREE.BufferAttribute(pillarGeo.attributes.uv.array, 2));
 
-    const pillar1 = new THREE.Mesh(pillarGeo, pilaresMat);
-    pillar1.position.set(43.238, 16, 52.521);
-    wallRightGroup.add(pillar1);
+    const posPilares = [
+        [43.238, 16, 52.521],  // Pilar 1 (Fondo)
+        [43.238, 16, 25.521],  // Pilar 2
+        [44.032, 16, -1.479],  // Pilar 3 (Con desfase leve de posición)
+        [44.029, 16, -28.531], // Pilar 4 (Con desfase leve de posición)
+        [43.238, 16, -55.531]  // Pilar 5 (Frente)
+    ];
+    posPilares.forEach(([x, y, z]) => {
+        const pillar = new THREE.Mesh(pillarGeo, pilaresMat);
+        pillar.position.set(x, y, z);
+        wallRightGroup.add(pillar);
+    });
 
-    const pillar2 = new THREE.Mesh(pillarGeo, pilaresMat);
-    pillar2.position.set(43.238, 16, 25.521);
-    wallRightGroup.add(pillar2);
-
-    const pillar3 = new THREE.Mesh(pillarGeo, pilaresMat);
-    pillar3.position.set(44.032, 16, -1.479);
-    wallRightGroup.add(pillar3);
-
-    const pillar4 = new THREE.Mesh(pillarGeo, pilaresMat);
-    pillar4.position.set(44.029, 16, -28.531);
-    wallRightGroup.add(pillar4);
-
-    const pillar5 = new THREE.Mesh(pillarGeo, pilaresMat);
-    pillar5.position.set(43.238, 16, -55.531);
-    wallRightGroup.add(pillar5);
-
-    // Viga horizontal
+    // Viga de Amarre Superior
     const vigasHorizontalesGeo = new THREE.BoxGeometry(8, 5, 115.852);
     vigasHorizontalesGeo.setAttribute('uv2', new THREE.BufferAttribute(vigasHorizontalesGeo.attributes.uv.array, 2));
 
@@ -152,44 +138,48 @@ export function createWallRight() {
     vigasHorizontales1.position.set(42.391, 33.25, -0.105);
     wallRightGroup.add(vigasHorizontales1);
 
-    //cuadrados centrales para columnas de piedra
+    // ---------------------------------------------------------------
+    // 4. BASES DE PIEDRA BAJO LOS PILARES
+    // ---------------------------------------------------------------
+    // Soportes de Piedra Inferiores (Más grandes)
     const squareCentralGeo = new THREE.BoxGeometry(5, 4.2, 6);
     squareCentralGeo.setAttribute('uv2', new THREE.BufferAttribute(squareCentralGeo.attributes.uv.array, 2));
-    // soporte de piedra desde el fondo hacia adelante
-    const soporte1 = new THREE.Mesh(squareCentralGeo, baseColumnaMat);
-    soporte1.position.set(41.488, 1.6, 52.469);
-    wallRightGroup.add(soporte1);
-    const soporte2 = new THREE.Mesh(squareCentralGeo, baseColumnaMat);
-    soporte2.position.set(41.488, 1.6, 25.469);
-    wallRightGroup.add(soporte2);
-    const soporte3 = new THREE.Mesh(squareCentralGeo, baseColumnaMat);
-    soporte3.position.set(42.282, 1.6, -1.531);
-    wallRightGroup.add(soporte3);
-    const soporte4 = new THREE.Mesh(squareCentralGeo, baseColumnaMat);
-    soporte4.position.set(42.279, 1.6, -28.531);
-    wallRightGroup.add(soporte4);
-    const soporte5 = new THREE.Mesh(squareCentralGeo, baseColumnaMat);
-    soporte5.position.set(41.488, 1.6, -55.531);
-    wallRightGroup.add(soporte5);
-    //pequeño soporte de piedra superior
+    const posSoportesInf = [
+        [41.488, 1.6, 52.469],  // Soporte 1 (Fondo)
+        [41.488, 1.6, 25.469],  // Soporte 2
+        [42.282, 1.6, -1.531],  // Soporte 3 (Con desfase leve)
+        [42.279, 1.6, -28.531], // Soporte 4 (Con desfase leve)
+        [41.488, 1.6, -55.531]  // Soporte 5 (Frente)
+    ];
+    posSoportesInf.forEach(([x, y, z]) => {
+        const soporte = new THREE.Mesh(squareCentralGeo, baseColumnaMat);
+        soporte.position.set(x, y, z);
+        wallRightGroup.add(soporte);
+    });
+
+    // Soportes de Piedra Superiores (Detalle más angosto)
     const squareSuperiorGeo = new THREE.BoxGeometry(4.75, 1, 5.5);
     squareSuperiorGeo.setAttribute('uv2', new THREE.BufferAttribute(squareSuperiorGeo.attributes.uv.array, 2));
-    const soporteSuperior1 = new THREE.Mesh(squareSuperiorGeo, baseColumnaMat);
-    soporteSuperior1.position.set(41.613, 4.213, 52.521);
-    wallRightGroup.add(soporteSuperior1);
-    const soporteSuperior2 = new THREE.Mesh(squareSuperiorGeo, baseColumnaMat);
-    soporteSuperior2.position.set(41.613, 4.213, 25.521);
-    wallRightGroup.add(soporteSuperior2);
-    const soporteSuperior3 = new THREE.Mesh(squareSuperiorGeo, baseColumnaMat);
-    soporteSuperior3.position.set(42.407, 4.213, -1.479);
-    wallRightGroup.add(soporteSuperior3);
-    const soporteSuperior4 = new THREE.Mesh(squareSuperiorGeo, baseColumnaMat);
-    soporteSuperior4.position.set(42.404, 4.213, -28.479);
-    wallRightGroup.add(soporteSuperior4);
-    const soporteSuperior5 = new THREE.Mesh(squareSuperiorGeo, baseColumnaMat);
-    soporteSuperior5.position.set(41.613, 4.213, -55.479);
-    wallRightGroup.add(soporteSuperior5);
+    const posSoportesSup = [
+        [41.613, 4.213, 52.521],  // Soporte Superior 1 (Fondo)
+        [41.613, 4.213, 25.521],  // Soporte Superior 2
+        [42.407, 4.213, -1.479],  // Soporte Superior 3 (Con desfase)
+        [42.404, 4.213, -28.479], // Soporte Superior 4 (Con desfase)
+        [41.613, 4.213, -55.479]  // Soporte Superior 5 (Frente)
+    ];
+    posSoportesSup.forEach(([x, y, z]) => {
+        const soporte = new THREE.Mesh(squareSuperiorGeo, baseColumnaMat);
+        soporte.position.set(x, y, z);
+        wallRightGroup.add(soporte);
+    });
 
+    // --esto fue modificado: Recorrido para la pared derecha proyecte y reciba sombras
+    wallRightGroup.traverse((child) => {
+        if (child.isMesh) {
+            child.castShadow = true;
+            child.receiveShadow = true;
+        }
+    });
 
-    return wallRightGroup; // ¡MUY IMPORTANTE RETORNARLO!
+    return wallRightGroup;
 }

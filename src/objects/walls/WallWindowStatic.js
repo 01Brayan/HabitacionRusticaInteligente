@@ -41,7 +41,7 @@ export function createWallWindowStatic() {
     const wallMat = new THREE.MeshStandardMaterial({
         map: paredDiffuse,
         normalMap: paredNormal,
-        normalScale: new THREE.Vector2(0.4, 0.4),
+        normalScale: new THREE.Vector2(1.0, 1.0),
         roughnessMap: paredRough,
         aoMap: paredAO,
         color: 0x5C4530, // tono de pared definido
@@ -52,7 +52,7 @@ export function createWallWindowStatic() {
     const marcoMat = new THREE.MeshStandardMaterial({
         map: maderaDiffuse,
         normalMap: maderaNormal,
-        normalScale: new THREE.Vector2(0.4, 0.4),
+        normalScale: new THREE.Vector2(1.0, 1.0),
         roughnessMap: maderaRough,
         aoMap: maderaAO,
         color: 0x4A3220, // marco externo
@@ -63,7 +63,7 @@ export function createWallWindowStatic() {
     const marcoInternoMat = new THREE.MeshStandardMaterial({
         map: maderaDiffuse,
         normalMap: maderaNormal,
-        normalScale: new THREE.Vector2(0.4, 0.4),
+        normalScale: new THREE.Vector2(1.0, 1.0),
         roughnessMap: maderaRough,
         aoMap: maderaAO,
         color: 0x3A2718, // travesaños internos, el más oscuro de los 2
@@ -112,7 +112,7 @@ export function createWallWindowStatic() {
     // ========================================================
 
     // 1. EL VIDRIO
-    const vidrio = new THREE.Mesh(new THREE.BoxGeometry(0.5, 8.865, 15.718), vidrioMat);
+    const vidrio = new THREE.Mesh(new THREE.BoxGeometry(0.25, 8.865, 15.718), vidrioMat);
     vidrio.position.set(45.548, 21.252, -14.963);
     wallGroup.add(vidrio);
 
@@ -183,6 +183,18 @@ export function createWallWindowStatic() {
     const marcoMediVertDerecho = new THREE.Mesh(geoMarcoMediVertDerecho, marcoInternoMat);
     marcoMediVertDerecho.position.set(45.536, 21.252, -12.454);
     wallGroup.add(marcoMediVertDerecho);
+
+    // --esto fue modificado: Recorrido para activar sombras en maderas y marcos, pero NO en el vidrio transparente (evita sombra fea de caja)
+    wallGroup.traverse((child) => {
+        if (child.isMesh) {
+            if (child.material === vidrioMat) {
+                child.castShadow = false;  // El vidrio no debe proyectar sombra opaca
+            } else {
+                child.castShadow = true;
+            }
+            child.receiveShadow = true;
+        }
+    });
 
     return wallGroup;
 }

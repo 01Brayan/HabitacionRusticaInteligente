@@ -1,0 +1,157 @@
+/* Panel inferior centrado: fondo oscuro translúcido + blur + bordes muy redondeados */
+.time-gui {
+    position: fixed;
+    left: 50%;
+    bottom: 28px;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 22px;
+    padding: 14px 30px;
+    border-radius: 999px;
+    background: rgba(20, 14, 9, 0.5);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 220, 180, 0.12);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.45);
+    color: #f4e9d8;
+    z-index: 100;
+    user-select: none;
+    font-family: Georgia, 'Times New Roman', serif; /* fallback sin instalar nada */
+}
+
+/* Si instalás una fuente serif más elegante (opcional, ver nota abajo),
+   agregá su nombre acá antes de Georgia */
+.time-gui__clock {
+    display: flex;
+    align-items: baseline;
+    gap: 1px;
+    min-width: 108px;
+}
+
+.time-gui__hour,
+.time-gui__minute {
+    font-size: 34px;
+    line-height: 1;
+}
+
+.time-gui__colon {
+    font-size: 26px;
+    opacity: 0.7;
+    margin: 0 1px;
+}
+
+.time-gui__period {
+    font-size: 12px;
+    margin-left: 6px;
+    letter-spacing: 1px;
+    opacity: 0.75;
+    align-self: flex-end;
+    font-family: system-ui, sans-serif;
+}
+
+.time-gui__divider {
+    width: 1px;
+    height: 40px;
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.time-gui__slider-block {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 380px;
+}
+
+/* --- Slider --- */
+.time-gui__range {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 6px;
+    background: transparent;
+    outline: none;
+    cursor: pointer;
+}
+
+/* Track con gradiente día/noche (Chrome/Edge/Safari) */
+.time-gui__range::-webkit-slider-runnable-track {
+    height: 6px;
+    border-radius: 999px;
+    background: linear-gradient(
+        90deg,
+        #2b3a67 0%,
+        #6c8fb0 10%,
+        #ffb27a 22%,
+        #ffe9b0 40%,
+        #fff8e6 50%,
+        #ffe9b0 60%,
+        #ff9a52 75%,
+        #6c8fb0 90%,
+        #2b3a67 100%
+    );
+}
+
+/* Mismo track para Firefox */
+.time-gui__range::-moz-range-track {
+    height: 6px;
+    border-radius: 999px;
+    background: linear-gradient(
+        90deg,
+        #2b3a67 0%,
+        #6c8fb0 10%,
+        #ffb27a 22%,
+        #ffe9b0 40%,
+        #fff8e6 50%,
+        #ffe9b0 60%,
+        #ff9a52 75%,
+        #6c8fb0 90%,
+        #2b3a67 100%
+    );
+}
+
+/* Thumb circular (Chrome/Edge/Safari) */
+.time-gui__range::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    margin-top: -6px;
+    border-radius: 50%;
+    background: #fff8ec;
+    border: 2px solid rgba(0, 0, 0, 0.25);
+    box-shadow: 0 0 6px rgba(255, 230, 180, 0.85);
+    cursor: pointer;
+}
+
+/* Thumb circular (Firefox) */
+.time-gui__range::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #fff8ec;
+    border: 2px solid rgba(0, 0, 0, 0.25);
+    box-shadow: 0 0 6px rgba(255, 230, 180, 0.85);
+    cursor: pointer;
+}
+
+.time-gui__labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    font-family: system-ui, sans-serif;
+    letter-spacing: 0.5px;
+    opacity: 0.6;
+    padding: 0 2px;
+}
+
+/* Responsive: en pantallas chicas, achica el panel */
+@media (max-width: 520px) {
+    .time-gui {
+        gap: 14px;
+        padding: 10px 18px;
+    }
+    .time-gui__slider-block {
+        width: 55vw;
+    }
+}
