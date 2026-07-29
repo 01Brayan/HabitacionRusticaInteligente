@@ -29,9 +29,6 @@ import { createLluviaEffect } from './climates/Lluvia.js';
 import { createNieveEffect } from './climates/Nieve.js';
 import { createNeblinaEffect } from './climates/Neblina.js';
 
-//importar suelo exterior
-import { createSueloExterior } from './Around/Suelo.js';
-
 // importacion de objetos
 import { createMesaDeNoche } from './objects/furniture/MesaDeNoche.js';
 import { createRopero } from './objects/furniture/ropero.js';
@@ -76,9 +73,6 @@ scene.add(skybox);
 const floor = createFloor();
 scene.add(floor);
 
-// AGREGAR SUELO EXTERIOR
-const sueloExterior = createSueloExterior();
-scene.add(sueloExterior.group);
 
 // AGREGAR CAMA
 const bed = createBed();
@@ -295,10 +289,7 @@ function setClimate(active) {
     neblinaEffect.group.visible = activeStates.neblina;
     scene.fog = activeStates.neblina ? new THREE.FogExp2(0xb3c5d3, 0.00145) : null;
 
-    if (typeof sueloExterior.setWeather === 'function') {
-        sueloExterior.setWeather(active || 'clear');
-    }
-
+    
     updateWeatherHint();
 
     if (hasClimateControls) {
