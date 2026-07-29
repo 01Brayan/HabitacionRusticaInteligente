@@ -65,9 +65,9 @@ const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 controls.dampingFactor = 0.05;
 
-// AGREGAR ENTORNO (SKYBOX)
-const skybox = createSkybox();
-scene.add(skybox);
+// AGREGAR ENTORNO (SKYBOX) -- comentado: usamos el cielo procedural de Lights.js
+// const skybox = createSkybox();
+// scene.add(skybox);
 
 // AGREGAR PISO
 const floor = createFloor();
