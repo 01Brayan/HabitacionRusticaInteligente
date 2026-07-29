@@ -287,7 +287,15 @@ function setClimate(active) {
     lluviaEffect.group.visible = activeStates.lluvia;
     nieveEffect.group.visible = activeStates.nieve;
     neblinaEffect.group.visible = activeStates.neblina;
-    scene.fog = activeStates.neblina ? new THREE.FogExp2(0xb3c5d3, 0.00145) : null;
+
+    // Guardar la niebla atmosférica base (de Lights.js) si existe
+    if (!window._baseFog && scene.fog) {
+        window._baseFog = scene.fog;
+    }
+    // Neblina: reemplaza la niebla con una más densa; si se apaga, restaura la base
+    scene.fog = activeStates.neblina
+        ? new THREE.FogExp2(0xb3c5d3, 0.00145)
+        : (window._baseFog || null);
 
     
     updateWeatherHint();
