@@ -6,8 +6,6 @@ import { createTimeGUI } from './ui/TimeGUI.js';
 
 import { setupResize } from './utils/ResizeHandler.js';
 import { startAnimation } from './animations/AnimationLoop.js';
-//crear el diseno del cielo
-import {createSkybox} from './objects/Skybox.js'
 
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 //crear cama
@@ -61,11 +59,10 @@ applyEnvironment(scene, renderer);
 //CONTROLES
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
-controls.dampingFactor = 0.05;
-
-// AGREGAR ENTORNO (SKYBOX) -- comentado: usamos el cielo procedural de Lights.js
-// const skybox = createSkybox();
-// scene.add(skybox);
+controls.dampingFactor = 0.08;
+controls.minDistance = 5;
+controls.maxDistance = 80;
+controls.maxPolarAngle = Math.PI / 2.2;
 
 // AGREGAR PISO
 const floor = createFloor();
