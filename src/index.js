@@ -228,4 +228,4 @@ const allObjects = [
 await applyLayout('src/assets/layout.json', allObjects);
 
 // ANIMACION
-startAnimation(renderer, scene, camera, controls, climateUpdaters);
+startAnimation(renderer, scene, camera, controls, climateUpdaters || []);
