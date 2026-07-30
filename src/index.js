@@ -228,4 +228,5 @@ const allObjects = [
 await applyLayout('src/assets/layout.json', allObjects);
 
 // ANIMACION
+console.log('Iniciando animacion con', climateUpdaters?.length, 'updaters');
 startAnimation(renderer, scene, camera, controls, climateUpdaters || []);
