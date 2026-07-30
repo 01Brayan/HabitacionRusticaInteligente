@@ -151,7 +151,8 @@ export function createLights(scene) {
         // 4. Aplicar color al sol
         sunLight.color.copy(sun.color);
         // 5. Sincronizar la niebla y el fondo con el color del cielo
-        if (scene.fog) {
+        //    (pero NO si el modo FRIO esta activo, la niebla debe ser gris fija)
+        if (scene.fog && !scene.userData.frioActivo) {
             scene.fog.color.copy(hemi.sky);
         }
         scene.background = hemi.sky.clone(); // Fondo sólido del color del cielo en esa hora

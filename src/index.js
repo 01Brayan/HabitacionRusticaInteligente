@@ -60,9 +60,6 @@ applyEnvironment(scene, renderer);
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 controls.dampingFactor = 0.08;
-controls.minDistance = 5;
-controls.maxDistance = 80;
-controls.maxPolarAngle = Math.PI / 2.2;
 
 // AGREGAR PISO
 const floor = createFloor();
@@ -164,7 +161,7 @@ document.body.appendChild(gui.element);
 
 
 // CLIMA: MODO FRIO
-const climaFrio = createClimaFrio(scene);
+const climaFrio = createClimaFrio(scene, lights.hemiLight, lights.fillLight);
 const climaUpdaters = [climaFrio.update];
 
 // Checkbox para activar/desactivar el frio
@@ -228,5 +225,5 @@ const allObjects = [
 await applyLayout('src/assets/layout.json', allObjects);
 
 // ANIMACION
-console.log('Iniciando animacion con', climateUpdaters?.length, 'updaters');
-startAnimation(renderer, scene, camera, controls, climateUpdaters || []);
+console.log('Iniciando animacion con', climaUpdaters?.length, 'updaters');
+startAnimation(renderer, scene, camera, controls, climaUpdaters || []);
