@@ -160,9 +160,12 @@ document.body.appendChild(gui.element);
 
 
 
-// CLIMA: MODO FRIO
+// CLIMA: MODO FRIO Y ANIMACIONES DE OBJETOS
 const climaFrio = createClimaFrio(scene, lights.hemiLight, lights.fillLight);
-const climaUpdaters = [climaFrio.update];
+const climaUpdaters = [
+    climaFrio.update,
+    chiminea.userData?.updateFuego
+].filter(Boolean);
 
 // Checkbox para activar/desactivar el frio
 const frioLabel = document.createElement('label');
@@ -178,6 +181,11 @@ frioCheck.addEventListener('change', () => {
     climaFrio.toggle();
     if (climaFrio.state.activo) {
         frioLabel.style.background = 'rgba(58, 100, 150, 0.9)';
+        // Al activar el modo FRIO, encender automáticamente el fuego de la chimenea si estaba apagado
+        if (!fuegoCheck.checked) {
+            fuegoCheck.checked = true;
+            fuegoCheck.dispatchEvent(new Event('change'));
+        }
     } else {
         frioLabel.style.background = 'rgba(18, 18, 28, 0.85)';
     }
@@ -190,6 +198,38 @@ frioLabel.appendChild(frioCheck);
 frioLabel.appendChild(frioText);
 document.body.appendChild(frioLabel);
 // FIN CLIMA
+
+// CONTROL INTERACTIVO FUEGO CHIMENEA (GSAP)
+const fuegoLabel = document.createElement('label');
+fuegoLabel.style.cssText = 'position:absolute;bottom:70px;left:20px;color:#fff;font-family:Arial;font-size:1rem;background:rgba(180, 70, 20, 0.9);padding:10px 16px;border-radius:8px;z-index:1000;display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;box-shadow: 0 4px 15px rgba(255, 100, 0, 0.3);transition: all 0.3s ease;';
+
+const fuegoCheck = document.createElement('input');
+fuegoCheck.type = 'checkbox';
+fuegoCheck.checked = true;
+fuegoCheck.style.width = '18px';
+fuegoCheck.style.height = '18px';
+fuegoCheck.style.cursor = 'pointer';
+
+fuegoCheck.addEventListener('change', () => {
+    const isChecked = fuegoCheck.checked;
+    if (typeof chiminea.userData?.toggleFuego === 'function') {
+        chiminea.userData.toggleFuego(isChecked);
+    }
+    if (isChecked) {
+        fuegoLabel.style.background = 'rgba(180, 70, 20, 0.9)';
+        fuegoLabel.style.boxShadow = '0 4px 15px rgba(255, 100, 0, 0.3)';
+    } else {
+        fuegoLabel.style.background = 'rgba(18, 18, 28, 0.85)';
+        fuegoLabel.style.boxShadow = 'none';
+    }
+});
+
+const fuegoText = document.createElement('span');
+fuegoText.textContent = '🔥 FUEGO CHIMENEA';
+
+fuegoLabel.appendChild(fuegoCheck);
+fuegoLabel.appendChild(fuegoText);
+document.body.appendChild(fuegoLabel);
 
 // RESPONSIVE
 setupResize(camera, renderer);
