@@ -134,9 +134,14 @@ export function createWallWindow() {
 
     // 2. LA HOJA MÓVIL IZQUIERDA (Ventana que se abre)
     // =============================================
+    // PIVOT: punto de bisagra (eje de rotacion en el borde izquierdo de la hoja)
+    const pivotIzq = new THREE.Group();
+    pivotIzq.name = "pivotVentanaIzq";
+    pivotIzq.position.set(-46.959, 21.43, -33.935);
+
     const hojaIzqGroup = new THREE.Group();
     hojaIzqGroup.name = "ventanaIzquierda";
-    hojaIzqGroup.position.set(-45.384, 21.43, -33.637);
+    hojaIzqGroup.position.set(0, 0, 0.298);
 
     const vidrioIzq = new THREE.Mesh(new THREE.BoxGeometry(0.25, 9.288, 7.5), vidrioMat);
     vidrioIzq.position.set(-0.75, 0.042, -4.348);
@@ -172,14 +177,20 @@ export function createWallWindow() {
     cruzIzq.position.set(-0.762, 0.258, -4.177);
     hojaIzqGroup.add(cruzIzq);
 
-    wallGroup.add(hojaIzqGroup);
+    pivotIzq.add(hojaIzqGroup);
+    wallGroup.add(pivotIzq);
 
     // ==========================================
     // 3. LA HOJA MÓVIL DERECHA (Ventana que se abre)
     // ==========================================
+    // PIVOT: punto de bisagra (eje de rotacion en el borde derecho de la hoja)
+    const pivotDer = new THREE.Group();
+    pivotDer.name = "pivotVentanaDer";
+    pivotDer.position.set(-46.959, 21.43, -50.302);
+
     const hojaDerGroup = new THREE.Group();
     hojaDerGroup.name = "ventanaDerecha";
-    hojaDerGroup.position.set(-45.384, 21.43, -50.584);
+    hojaDerGroup.position.set(0, 0, -0.282);
 
     const vidrioDer = new THREE.Mesh(new THREE.BoxGeometry(0.25, 9.288, 7.5), vidrioMat);
     vidrioDer.position.set(-0.75, 0.042, 4.386);
@@ -215,7 +226,23 @@ export function createWallWindow() {
     cruzDer.position.set(-0.762, 0.258, 4.211);
     hojaDerGroup.add(cruzDer);
 
-    wallGroup.add(hojaDerGroup);
+    pivotDer.add(hojaDerGroup);
+    wallGroup.add(pivotDer);
+
+    // Funcion para abrir/cerrar las hojas con animacion suave.
+    // angulo: radianes objetivo de apertura (positivo = hacia afuera)
+    // 0 = cerrada, 2.094 (120°) = totalmente abierta
+    let objetivoIzq = 0;
+    wallGroup.userData.setApertura = (angulo) => {
+        objetivoIzq = angulo;
+    };
+    wallGroup.userData.actualizar = () => {
+        // lerp: mueve el angulo actual suavemente hacia el objetivo
+        pivotIzq.rotation.y = THREE.MathUtils.lerp(pivotIzq.rotation.y, objetivoIzq, 0.05);
+        pivotDer.rotation.y = THREE.MathUtils.lerp(pivotDer.rotation.y, -objetivoIzq, 0.05);
+    };
+    wallGroup.userData.pivotIzq = pivotIzq;
+    wallGroup.userData.pivotDer = pivotDer;
 
     // --esto fue modificado: Recorrido para activar sombras en maderas, evitando que el vidrio transparente proyecte sombra opaca
     wallGroup.traverse((child) => {

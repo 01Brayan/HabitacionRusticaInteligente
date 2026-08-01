@@ -147,11 +147,13 @@ scene.add(roof);
 const lights = createLights(scene);
 
 // GUI de hora del dia
+let horaActual = 7;
 const gui = createTimeGUI({
     min: 5,
     max: 20,
     initial: 7,
     onChange: (hour) => {
+        horaActual = hour;
         lights.setTime(hour);
     },
 });
@@ -190,6 +192,36 @@ frioLabel.appendChild(frioCheck);
 frioLabel.appendChild(frioText);
 document.body.appendChild(frioLabel);
 // FIN CLIMA
+
+// ===========================================
+// VENTANAS AUTOMATICAS (se abren con calor)
+// ===========================================
+const ANGULO_ABIERTA = THREE.MathUtils.degToRad(120); // 120° abierta
+const HORA_INICIO_CALOR = 10;
+const HORA_FIN_CALOR = 15;
+
+// Recolectar las 2 ventanas modulares de la pared izquierda
+const ventanas = [];
+wallLeft.traverse((child) => {
+    if (child.userData && typeof child.userData.setApertura === 'function') {
+        ventanas.push(child);
+    }
+});
+
+function updateVentanas() {
+    // Si hace calor (10-15h) y NO esta el modo frio activo → abrir
+    const haceCalor = horaActual >= HORA_INICIO_CALOR && horaActual <= HORA_FIN_CALOR && !climaFrio.state.activo;
+    const objetivo = haceCalor ? ANGULO_ABIERTA : 0;
+
+    ventanas.forEach(win => {
+        win.userData.setApertura(objetivo); // fija el objetivo
+        win.userData.actualizar();          // anima suavemente hacia el
+    });
+}
+
+// Agregar al bucle de animacion
+climaUpdaters.push(updateVentanas);
+// ===========================================
 
 // RESPONSIVE
 setupResize(camera, renderer);
