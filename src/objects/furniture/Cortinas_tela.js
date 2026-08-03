@@ -10,16 +10,11 @@ export function createCortinaInstance(config = {}) {
 
     const textureLoader = new THREE.TextureLoader();
 
-    // Cargar texturas PBR de la cortina
+    // Cargar únicamente la textura de difuso disponible
     const diffuseMap = textureLoader.load('src/assets/textures/curtains/difuse/difuse_2k.jpg');
-    const normalMap  = textureLoader.load('src/assets/textures/curtains/normal_gl/normal_gl_2k.png');
-    const armMap     = textureLoader.load('src/assets/textures/curtains/AORoughMetal/arm_2k.png');
-
     diffuseMap.colorSpace = THREE.SRGBColorSpace;
-    [diffuseMap, normalMap, armMap].forEach((tex) => {
-        tex.wrapS = THREE.RepeatWrapping;
-        tex.wrapT = THREE.RepeatWrapping;
-    });
+    diffuseMap.wrapS = THREE.RepeatWrapping;
+    diffuseMap.wrapT = THREE.RepeatWrapping;
 
     const targetWidth = config.targetWidth || 18.0;
     const targetHeight = config.targetHeight || 12.2;
@@ -66,12 +61,7 @@ export function createCortinaInstance(config = {}) {
 
                     child.material = new THREE.MeshStandardMaterial({
                         map: diffuseMap,
-                        normalMap: normalMap,
-                        normalScale: new THREE.Vector2(1.0, 1.0),
-                        aoMap: armMap,
-                        roughnessMap: armMap,
-                        metalnessMap: armMap,
-                        roughness: 0.8,
+                        roughness: 0.85,
                         metalness: 0.05,
                         side: THREE.DoubleSide,
                     });
