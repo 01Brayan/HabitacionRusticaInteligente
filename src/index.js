@@ -7,9 +7,6 @@ import { createTimeGUI } from './ui/TimeGUI.js';
 import { setupResize } from './utils/ResizeHandler.js';
 import { startAnimation } from './animations/AnimationLoop.js';
 
-// crear el diseno del cielo
-import { createSkybox } from './objects/Skybox.js';
-
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 // crear cama
 import { createBed } from './objects/furniture/Bed.js';
@@ -168,9 +165,6 @@ document.body.appendChild(gui.element);
 
 
 // EFECTOS DE CLIMA
-const lluviaEffect = createLluviaEffect();
-const nieveEffect = createNieveEffect();
-const neblinaEffect = createNeblinaEffect();
 
 // CLIMA: MODO FRIO
 const climaFrio = createClimaFrio(scene, lights.hemiLight, lights.fillLight);
@@ -205,45 +199,6 @@ document.body.appendChild(frioLabel);
 // FIN CLIMA
 
 
-    // Guardar la niebla atmosférica base (de Lights.js) si existe
-    if (!window._baseFog && scene.fog) {
-        window._baseFog = scene.fog;
-    }
-    // Neblina: reemplaza la niebla con una más densa; si se apaga, restaura la base
-    scene.fog = activeStates.neblina
-        ? new THREE.FogExp2(0xb3c5d3, 0.00145)
-        : (window._baseFog || null);
-
-    updateWeatherHint();
-
-    if (hasClimateControls) {
-        Object.keys(climateButtons).forEach((key) => {
-            const button = climateButtons[key];
-            if (!button) {
-                return;
-            }
-            if (key === 'detener') {
-                if (!active) {
-                    button.classList.add('active');
-                    button.style.background = '#ff5c5c';
-                } else {
-                    button.classList.remove('active');
-                    button.style.background = '#2a2f47';
-                }
-                return;
-            }
-
-            if (activeStates[key]) {
-                button.classList.add('active');
-                button.style.background = '#5c82ff';
-            } else {
-                button.classList.remove('active');
-                button.style.background = '#2a2f47';
-            }
-        });
-    }
-
-setClimate(null);
 
 
 // RESPONSIVE
@@ -289,12 +244,12 @@ await applyLayout('src/assets/layout.json', allObjects, scene);
 interiorLights.refresh(allObjects);
 
 // ANIMACION
-
 startAnimation(
-    renderer, scene, camera, controls, climateUpdaters,
+    renderer,
+    scene,
+    camera,
+    controls,
+    climaUpdaters,
     interiorLights,
     () => hourToDarkness(currentHour)
 );
-
-console.log('Iniciando animacion con', climaUpdaters?.length, 'updaters');
-startAnimation(renderer, scene, camera, controls, climaUpdaters || []);
