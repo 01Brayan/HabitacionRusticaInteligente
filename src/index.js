@@ -1,6 +1,6 @@
-import { createScene } from './core/SceneManager.js' ;
+import { createScene } from './core/SceneManager.js';
 import { createCamera } from './core/CameraManager.js';
-import { createRenderer , applyEnvironment} from './core/RendererManager.js';
+import { createRenderer, applyEnvironment } from './core/RendererManager.js';
 import { createLights } from './lights/Lights.js';
 import { createTimeGUI } from './ui/TimeGUI.js';
 
@@ -8,15 +8,15 @@ import { setupResize } from './utils/ResizeHandler.js';
 import { startAnimation } from './animations/AnimationLoop.js';
 
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-//crear cama
-import {createBed} from './objects/furniture/Bed.js';
-//crear piso
+// crear cama
+import { createBed } from './objects/furniture/Bed.js';
+// crear piso
 import { createFloor } from './objects/Floor.js';
-//importar paredes
+// importar paredes
 import { createWallBack } from './objects/walls/WallBack.js';
 import { createWallRight } from './objects/walls/WallRight.js';
 import { createWallLeft } from './objects/walls/WallLeft.js';
-import {createWallWindow} from './objects/walls/WallWindow.js'
+import { createWallWindow } from './objects/walls/WallWindow.js';
 import * as THREE from 'three';
 
 // importar techo
@@ -39,10 +39,12 @@ import { createCaja } from './objects/furniture/Caja.js';
 import { createBarril } from './objects/furniture/Barril.js';
 import { createRepisaInferior, createRepisaSuperior } from './objects/furniture/Repisa.js';
 
-//import de las decoraciones
+// import de las decoraciones
 import { createDecorations } from './objects/decorations/Decorations.js';
 import { applyLayout } from './utils/LayoutLoader.js';
 
+// sistema de luces interiores (lámparas + candelabro)
+import { InteriorLightsManager, hourToDarkness } from './lights/InteriorLightsManager.js';
 
 // CONTENEDOR
 const container = document.getElementById('container');
@@ -56,7 +58,7 @@ const camera = createCamera();
 // RENDERER
 const renderer = createRenderer(container);
 applyEnvironment(scene, renderer);
-//CONTROLES
+// CONTROLES
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 controls.dampingFactor = 0.08;
@@ -65,104 +67,109 @@ controls.dampingFactor = 0.08;
 const floor = createFloor();
 scene.add(floor);
 
-
 // AGREGAR CAMA
 const bed = createBed();
-bed.position.set(0, 0,-1);
+bed.position.set(0, 0, -1);
 scene.add(bed);
 
 const mesaDeNoche = createMesaDeNoche();
-mesaDeNoche.position.set(0,0,-1);
+mesaDeNoche.position.set(0, 0, -1);
 scene.add(mesaDeNoche);
 
 const mesaDeNoche2 = createMesaDeNoche();
-mesaDeNoche2.position.set(-34.5,0,-1);
+mesaDeNoche2.position.set(-34.5, 0, -1);
 scene.add(mesaDeNoche2);
 
 const ropero = createRopero();
-ropero.position.set(0,0,0);
+ropero.position.set(0, 0, 0);
 scene.add(ropero);
 
 const estanteria = createEstanteria();
-estanteria.position.set(0,0,0);
+estanteria.position.set(0, 0, 0);
 scene.add(estanteria);
 
 const comoda = createComoda();
-comoda.position.set(0,0,0);
+comoda.position.set(0, 0, 0);
 scene.add(comoda);
 
 const chiminea = createChimenea();
-chiminea.position.set(0,0,0);
+chiminea.position.set(0, 0, 0);
 scene.add(chiminea);
 
 const mesacentro = createMesaCentro();
-mesacentro.position.set(0,0,0);
+mesacentro.position.set(0, 0, 0);
 scene.add(mesacentro);
 
 const sofa = createSofa();
-sofa.position.set(0,0,0);
+sofa.position.set(0, 0, 0);
 scene.add(sofa);
 
 const tapeteblanco = createTapeteBlanco();
-tapeteblanco.position.set(0,0,0);
+tapeteblanco.position.set(0, 0, 0);
 scene.add(tapeteblanco);
 
-const tapeterojo= createTapeteRojo();
-tapeterojo.position.set(0,0,0);
+const tapeterojo = createTapeteRojo();
+tapeterojo.position.set(0, 0, 0);
 scene.add(tapeterojo);
 
-const cajademadera= createCaja();
-cajademadera.position.set(0,0,0);
+const cajademadera = createCaja();
+cajademadera.position.set(0, 0, 0);
 scene.add(cajademadera);
 
-const barril= createBarril();
-barril.position.set(0,0,0);
+const barril = createBarril();
+barril.position.set(0, 0, 0);
 scene.add(barril);
 
 const repisa = createRepisaSuperior();
-repisa.position.set(0,0,-1);
+repisa.position.set(0, 0, -1);
 scene.add(repisa);
 
 const repisainf = createRepisaInferior();
-repisainf.position.set(0,0,-1);
+repisainf.position.set(0, 0, -1);
 scene.add(repisainf);
+
 // AGREGAR PARED TRASERA
 const wallBack = createWallBack();
 wallBack.position.set(0, 0, -1);
 scene.add(wallBack);
-//AGREGAR PARED IZQUIERDA
+// AGREGAR PARED IZQUIERDA
 const wallLeft = createWallLeft();
 wallLeft.position.set(0, 0, 0);
 scene.add(wallLeft);
-//AGREGAR PARED DERECHA
+// AGREGAR PARED DERECHA
 const wallRight = createWallRight();
 wallRight.position.set(0, 0, 0);
 scene.add(wallRight);
 
-//AGREGAR TECHO
+// AGREGAR TECHO
 const roof = createRoof();
 roof.position.set(0, 0, 0);
 scene.add(roof);
-// LUCES
+
+// LUCES (sol/luna/cielo — sistema de tu compañero)
 const lights = createLights(scene);
 
 // GUI de hora del dia
+let currentHour = 7;
+
 const gui = createTimeGUI({
     min: 5,
     max: 20,
     initial: 7,
     onChange: (hour) => {
         lights.setTime(hour);
+        currentHour = hour;
     },
 });
 document.body.appendChild(gui.element);
 
 
-
+// EFECTOS DE CLIMA
 
 // CLIMA: MODO FRIO
 const climaFrio = createClimaFrio(scene, lights.hemiLight, lights.fillLight);
 const climaUpdaters = [climaFrio.update];
+
 
 // Checkbox para activar/desactivar el frio
 const frioLabel = document.createElement('label');
@@ -191,6 +198,9 @@ frioLabel.appendChild(frioText);
 document.body.appendChild(frioLabel);
 // FIN CLIMA
 
+
+
+
 // RESPONSIVE
 setupResize(camera, renderer);
 
@@ -215,15 +225,31 @@ repisainf.name = 'repisainf';
 const decorations = await createDecorations();
 scene.add(decorations);
 
-// Aplicar posiciones guardadas en layout.json
+// Lista de todos los objetos que pueden tener layout guardado y/o luz interior
 const allObjects = [
     bed, mesaDeNoche, mesaDeNoche2, ropero, estanteria, comoda,
     chiminea, mesacentro, sofa, tapeteblanco, tapeterojo,
     cajademadera, barril, repisa, repisainf,
     ...decorations.children
 ];
-await applyLayout('src/assets/layout.json', allObjects);
+
+// Crear el manager de luces interiores ANTES de applyLayout
+// (así los duplicados heredan su propia luz al clonarse)
+const interiorLights = new InteriorLightsManager(allObjects);
+
+// Aplicar posiciones guardadas (aquí se recrean los duplicados)
+await applyLayout('src/assets/layout.json', allObjects, scene);
+
+// Registrar las luces de los duplicados recién creados
+interiorLights.refresh(allObjects);
 
 // ANIMACION
-console.log('Iniciando animacion con', climaUpdaters?.length, 'updaters');
-startAnimation(renderer, scene, camera, controls, climaUpdaters || []);
+startAnimation(
+    renderer,
+    scene,
+    camera,
+    controls,
+    climaUpdaters,
+    interiorLights,
+    () => hourToDarkness(currentHour)
+);
