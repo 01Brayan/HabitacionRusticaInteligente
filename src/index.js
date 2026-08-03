@@ -152,27 +152,13 @@ const lights = createLights(scene);
 // GUI de hora del dia
 let currentHour = 7;
 
-const gui = createTimeGUI({
-    min: 5,
-    max: 20,
-    initial: 7,
-    onChange: (hour) => {
-        lights.setTime(hour);
-        currentHour = hour;
-    },
-});
-document.body.appendChild(gui.element);
+// Determinar si la chimenea debe encenderse automáticamente según la hora
+// (5:00 AM a antes de las 8:00 AM  Y  5:30 PM [17.5] en adelante)
+function isFireplaceTime(hour) {
+    return (hour >= 5.0 && hour < 8.0) || (hour >= 17.5);
+}
 
-
-// EFECTOS DE CLIMA
-
-// CLIMA: MODO FRIO Y ANIMACIONES DE OBJETOS
-const climaFrio = createClimaFrio(scene, lights.hemiLight, lights.fillLight);
-const climaUpdaters = [
-    climaFrio.update,
-    chiminea.userData?.updateFuego
-].filter(Boolean);
-
+let lastFireplaceAutoState = isFireplaceTime(currentHour);
 
 // CONTROL INTERACTIVO FUEGO CHIMENEA (GSAP)
 const fuegoLabel = document.createElement('label');
@@ -180,10 +166,19 @@ fuegoLabel.style.cssText = 'position:absolute;bottom:70px;left:20px;color:#fff;f
 
 const fuegoCheck = document.createElement('input');
 fuegoCheck.type = 'checkbox';
-fuegoCheck.checked = true;
+fuegoCheck.checked = isFireplaceTime(currentHour);
 fuegoCheck.style.width = '18px';
 fuegoCheck.style.height = '18px';
 fuegoCheck.style.cursor = 'pointer';
+
+if (!fuegoCheck.checked) {
+    fuegoLabel.style.background = 'rgba(18, 18, 28, 0.85)';
+    fuegoLabel.style.boxShadow = 'none';
+}
+
+if (typeof chiminea.userData?.toggleFuego === 'function') {
+    chiminea.userData.toggleFuego(fuegoCheck.checked);
+}
 
 fuegoCheck.addEventListener('change', () => {
     const isChecked = fuegoCheck.checked;
@@ -200,11 +195,42 @@ fuegoCheck.addEventListener('change', () => {
 });
 
 const fuegoText = document.createElement('span');
-fuegoText.textContent = '🔥 FUEGO CHIMENEA';
+fuegoText.textContent = '🔥 Encender Chimenea';
 
 fuegoLabel.appendChild(fuegoCheck);
 fuegoLabel.appendChild(fuegoText);
 document.body.appendChild(fuegoLabel);
+
+const gui = createTimeGUI({
+    min: 5,
+    max: 20,
+    initial: 7,
+    onChange: (hour) => {
+        lights.setTime(hour);
+        currentHour = hour;
+
+        // Control automático de la chimenea según horario (5:00 AM - 8:00 AM y 5:30 PM+)
+        const shouldBeOn = isFireplaceTime(hour);
+        if (shouldBeOn !== lastFireplaceAutoState) {
+            lastFireplaceAutoState = shouldBeOn;
+            if (fuegoCheck.checked !== shouldBeOn) {
+                fuegoCheck.checked = shouldBeOn;
+                fuegoCheck.dispatchEvent(new Event('change'));
+            }
+        }
+    },
+});
+document.body.appendChild(gui.element);
+
+
+// EFECTOS DE CLIMA
+
+// CLIMA: MODO FRIO Y ANIMACIONES DE OBJETOS
+const climaFrio = createClimaFrio(scene, lights.hemiLight, lights.fillLight);
+const climaUpdaters = [
+    climaFrio.update,
+    chiminea.userData?.updateFuego
+].filter(Boolean);
 
 // Checkbox para activar/desactivar el frio
 const frioLabel = document.createElement('label');
