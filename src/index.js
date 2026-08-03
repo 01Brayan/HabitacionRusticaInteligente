@@ -188,12 +188,25 @@ repisainf.name = 'repisainf';
 // AGREGAR DECORACIONES (objetos importados de Blender)
 const decorations = await createDecorations();
 
-// Ocultar / remover la cortina plana antigua que venía dentro de Decorations.glb
-const oldCortinaMesh = decorations.getObjectByName('cortina');
-if (oldCortinaMesh) {
-    oldCortinaMesh.visible = false;
-    oldCortinaMesh.removeFromParent();
-}
+// Ocultar / remover absolutamente todas las cortinas y paneles antiguos (cortina, pplane, plane, polysurface) de Decorations.glb
+const oldCurtainObjects = [];
+decorations.traverse((child) => {
+    const nameLower = (child.name || '').toLowerCase();
+    if (
+        nameLower.includes('cortina') || 
+        nameLower.includes('pplane') || 
+        nameLower.includes('plane') || 
+        nameLower.includes('polysurface')
+    ) {
+        oldCurtainObjects.push(child);
+    }
+});
+oldCurtainObjects.forEach((child) => {
+    child.visible = false;
+    if (child.parent) {
+        child.removeFromParent();
+    }
+});
 
 scene.add(decorations);
 

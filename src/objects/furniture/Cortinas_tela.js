@@ -1,8 +1,7 @@
 import * as THREE from 'three';
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 /**
- * Carga e instancia las cortinas 3D (Cortinas_tela.glb) con animación nativa de apertura y cierre mediante pivotes laterales.
+ * Carga e instancia las cortinas 3D (Cortinas_tela.glb) con animación procedimental de pliegues y arrugas en 3D.
  */
 export function createCortinaInstance(config = {}) {
     const cortinaGroup = new THREE.Group();
@@ -10,92 +9,79 @@ export function createCortinaInstance(config = {}) {
 
     const textureLoader = new THREE.TextureLoader();
 
-    // Cargar únicamente la textura de difuso disponible
+    // Cargar textura de difuso
     const diffuseMap = textureLoader.load('src/assets/textures/curtains/difuse/difuse_2k.jpg');
     diffuseMap.colorSpace = THREE.SRGBColorSpace;
     diffuseMap.wrapS = THREE.RepeatWrapping;
     diffuseMap.wrapT = THREE.RepeatWrapping;
 
-    const targetWidth = config.targetWidth || 18.0;
-    const targetHeight = config.targetHeight || 12.2;
-    const halfWidth = targetWidth / 2.0;
-
-    // Crear pivotes izquierdo y derecho para abrir desde el centro hacia los bordes
-    const leftPivot = new THREE.Group();
-    leftPivot.name = "LeftPivot";
-    leftPivot.position.set(-halfWidth, 0, 0);
-
-    const rightPivot = new THREE.Group();
-    rightPivot.name = "RightPivot";
-    rightPivot.position.set(halfWidth, 0, 0);
-
-    cortinaGroup.add(leftPivot);
-    cortinaGroup.add(rightPivot);
-
+    // En lugar de usar el GLB, creamos la geometría de forma procedimental
+    // para evitar capas extra y mejorar el rendimiento.
+    const meshEntries = [];
     let animProgress = 0.0; // 0.0 = Cerrada, 1.0 = Abierta
     let targetProgress = 0.0;
     let isOpen = false;
 
-    const loader = new GLTFLoader();
+    const targetWidth = config.targetWidth || 18.0;
+    const targetHeight = config.targetHeight || 12.2;
+    
+    const material = new THREE.MeshStandardMaterial({
+        map: diffuseMap,
+        roughness: 0.85,
+        metalness: 0.05,
+        side: THREE.DoubleSide,
+    });
 
-    loader.load(
-        'src/assets/models/Cortinas_tela.glb',
-        (gltf) => {
-            const baseModel = gltf.scene;
+    const modelWrapper = new THREE.Group();
 
-            // Calcular bounding box para centrar el modelo base
-            const bbox = new THREE.Box3().setFromObject(baseModel);
-            const center = bbox.getCenter(new THREE.Vector3());
-            const size = bbox.getSize(new THREE.Vector3());
+    // Panel Izquierdo (x de -1 a 0)
+    const geoIzq = new THREE.PlaneGeometry(1, 2, 32, 16);
+    geoIzq.translate(-0.5, 0, 0); // Vértices irán de -1 a 0
+    const uvIzq = geoIzq.attributes.uv;
+    for (let i = 0; i < uvIzq.count; i++) {
+        uvIzq.setX(i, uvIzq.getX(i) * 0.5); // 0 a 0.5
+    }
+    const meshIzq = new THREE.Mesh(geoIzq, material);
+    meshIzq.castShadow = true;
+    meshIzq.receiveShadow = true;
+    if (meshIzq.geometry.attributes.uv && !meshIzq.geometry.attributes.uv2) {
+        meshIzq.geometry.setAttribute('uv2', meshIzq.geometry.attributes.uv);
+    }
+    
+    // Panel Derecho (x de 0 a 1)
+    const geoDer = new THREE.PlaneGeometry(1, 2, 32, 16);
+    geoDer.translate(0.5, 0, 0); // Vértices irán de 0 a 1
+    const uvDer = geoDer.attributes.uv;
+    for (let i = 0; i < uvDer.count; i++) {
+        uvDer.setX(i, 0.5 + uvDer.getX(i) * 0.5); // 0.5 a 1.0
+    }
+    const meshDer = new THREE.Mesh(geoDer, material);
+    meshDer.castShadow = true;
+    meshDer.receiveShadow = true;
+    if (meshDer.geometry.attributes.uv && !meshDer.geometry.attributes.uv2) {
+        meshDer.geometry.setAttribute('uv2', meshDer.geometry.attributes.uv);
+    }
 
-            baseModel.position.set(-center.x, -center.y, -center.z);
+    modelWrapper.add(meshIzq);
+    modelWrapper.add(meshDer);
 
-            baseModel.traverse((child) => {
-                if (child.isMesh) {
-                    child.castShadow = true;
-                    child.receiveShadow = true;
+    meshEntries.push({
+        mesh: meshIzq,
+        origPositions: new Float32Array(meshIzq.geometry.attributes.position.array),
+        isLeft: true
+    });
+    meshEntries.push({
+        mesh: meshDer,
+        origPositions: new Float32Array(meshDer.geometry.attributes.position.array),
+        isLeft: false
+    });
 
-                    if (child.geometry.attributes.uv && !child.geometry.attributes.uv2) {
-                        child.geometry.setAttribute('uv2', child.geometry.attributes.uv);
-                    }
+    const scaleX = config.scaleX || (targetWidth / 2.0);
+    const scaleY = config.scaleY || (targetHeight / 2.0);
+    const scaleZ = config.scaleZ || scaleX;
 
-                    child.material = new THREE.MeshStandardMaterial({
-                        map: diffuseMap,
-                        roughness: 0.85,
-                        metalness: 0.05,
-                        side: THREE.DoubleSide,
-                    });
-                }
-            });
-
-            const currentWidth = size.x > 0 ? size.x : 2.0;
-            const currentHeight = size.y > 0 ? size.y : 2.0;
-
-            const scaleX = (halfWidth / currentWidth) * 1.02; // Leve solapamiento en el centro
-            const scaleY = targetHeight / currentHeight;
-            const scaleZ = scaleX;
-
-            // Panel Izquierdo
-            const leftModel = baseModel.clone(true);
-            const leftWrapper = new THREE.Group();
-            leftWrapper.add(leftModel);
-            leftWrapper.scale.set(scaleX, scaleY, scaleZ);
-            leftWrapper.position.set(halfWidth / 2.0, 0, 0);
-            leftPivot.add(leftWrapper);
-
-            // Panel Derecho
-            const rightModel = baseModel.clone(true);
-            const rightWrapper = new THREE.Group();
-            rightWrapper.add(rightModel);
-            rightWrapper.scale.set(scaleX, scaleY, scaleZ);
-            rightWrapper.position.set(-halfWidth / 2.0, 0, 0);
-            rightPivot.add(rightWrapper);
-        },
-        undefined,
-        (error) => {
-            console.error('Error al cargar Cortinas_tela.glb:', error);
-        }
-    );
+    modelWrapper.scale.set(scaleX, scaleY, scaleZ);
+    cortinaGroup.add(modelWrapper);
 
     if (config.position) {
         cortinaGroup.position.set(config.position.x, config.position.y, config.position.z);
@@ -104,9 +90,11 @@ export function createCortinaInstance(config = {}) {
         cortinaGroup.rotation.set(config.rotation.x || 0, config.rotation.y || 0, config.rotation.z || 0);
     }
 
-    function updateAnimation(delta) {
+    function updateWrinkleDeformation(delta) {
+        if (meshEntries.length === 0) return;
+
         if (animProgress !== targetProgress) {
-            const speed = 2.0; // Transición ágil en 0.5s
+            const speed = 1.4; // Transición fluida en ~0.7 segundos
             if (animProgress < targetProgress) {
                 animProgress = Math.min(targetProgress, animProgress + delta * speed);
             } else {
@@ -118,18 +106,51 @@ export function createCortinaInstance(config = {}) {
                 ? 4 * animProgress * animProgress * animProgress
                 : 1 - Math.pow(-2 * animProgress + 2, 3) / 2;
 
-            // Al abrir (t=1), la cortina se pliega al 20% de su ancho contra cada lateral
-            const currentScaleX = 1.0 - 0.80 * t;
+            const compressedWidth = 1.0 - 0.85 * t;
 
-            leftPivot.scale.x = currentScaleX;
-            rightPivot.scale.x = currentScaleX;
+            for (const entry of meshEntries) {
+                const mesh = entry.mesh;
+                const origPositions = entry.origPositions;
+                const posAttr = mesh.geometry.attributes.position;
+                const positions = posAttr.array;
+                const count = posAttr.count;
+
+                for (let i = 0; i < count; i++) {
+                    const x0 = origPositions[i * 3];
+                    const y0 = origPositions[i * 3 + 1];
+                    const z0 = origPositions[i * 3 + 2];
+
+                    // Deformación de tela y pliegues
+                    const vFactor = Math.min(1.0, Math.max(0.0, (z0 + 0.93) / 0.4));
+                    const wave1 = Math.sin((x0 + 1.0) * Math.PI * 10);
+                    const wave2 = Math.sin((x0 + 1.0) * Math.PI * 20) * 0.35;
+                    const wrinkleZ = (wave1 + wave2) * 0.15 * vFactor * (0.3 + 0.7 * t);
+
+                    if (entry.isLeft) {
+                        // Panel Izquierdo: se recoge hacia la izquierda (-1.0) formando pliegues
+                        const pushX = Math.cos((x0 + 1.0) * Math.PI * 10) * 0.04 * vFactor * t;
+                        positions[i * 3]     = -1.0 + (x0 + 1.0) * compressedWidth + pushX;
+                        positions[i * 3 + 1] = y0 + (wave1 * 0.03 * vFactor * t);
+                        positions[i * 3 + 2] = z0 - wrinkleZ;
+                    } else {
+                        // Panel Derecho: se recoge hacia la derecha (+1.0) formando pliegues
+                        const pushX = Math.cos((1.0 - x0) * Math.PI * 10) * 0.04 * vFactor * t;
+                        positions[i * 3]     = 1.0 - (1.0 - x0) * compressedWidth - pushX;
+                        positions[i * 3 + 1] = y0 + (wave1 * 0.03 * vFactor * t);
+                        positions[i * 3 + 2] = z0 - wrinkleZ;
+                    }
+                }
+
+                posAttr.needsUpdate = true;
+                mesh.geometry.computeVertexNormals();
+            }
         }
     }
 
     return {
         group: cortinaGroup,
         update: (delta) => {
-            updateAnimation(delta);
+            updateWrinkleDeformation(delta);
         },
         toggle: () => {
             isOpen = !isOpen;
