@@ -1,10 +1,23 @@
-export function startAnimation(renderer, scene, camera, controls, climateUpdaters = []) {
+import * as THREE from 'three';
+
+export function startAnimation(
+    renderer,
+    scene,
+    camera,
+    controls,
+    climateUpdaters = [],
+    interiorLights = null,
+    getDarkness = () => 0
+) {
+    const clock = new THREE.Clock();
+
     function animate() {
         requestAnimationFrame(animate);
-        
-        // Actualiza los controles del mouse en cada frame
+
+        const delta = clock.getDelta();
+
         if (controls && typeof controls.update === 'function') {
-            controls.update(); 
+            controls.update();
         }
 
         climateUpdaters.forEach((updater) => {
@@ -12,6 +25,10 @@ export function startAnimation(renderer, scene, camera, controls, climateUpdater
                 updater();
             }
         });
+
+        if (interiorLights) {
+            interiorLights.update(delta, getDarkness());
+        }
 
         renderer.render(scene, camera);
     }
