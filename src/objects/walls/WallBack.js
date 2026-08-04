@@ -93,11 +93,11 @@ export function createWallBack() {
 
     const vidrioMat = new THREE.MeshPhysicalMaterial({
         color: 0xBFD9E8,
-        transmission: 0.95,
+        transparent: true,
+        opacity: 0.25,
         roughness: 0.05,
-        thickness: 0.3,
-        ior: 1.5,
         metalness: 0,
+        depthWrite: false,
     });
 
     const baseColumnaMat = new THREE.MeshStandardMaterial({
@@ -214,10 +214,13 @@ export function createWallBack() {
     vidrioIzquierda.position.set(28.016, 28.25, 57.196);
 
     // Cortina Ventana Izquierda
-    const cortinaIzquierdaGeo = new THREE.PlaneGeometry(22.25, 16, 1, 20);
+    // La geometria tiene el TOPE en el origen (translate hacia ABAJO),
+    // asi al escalar en Y la cortina crece hacia abajo sin mover el tope.
+    const cortinaIzquierdaGeo = new THREE.PlaneGeometry(22.25, 40.5, 1, 20);
+    cortinaIzquierdaGeo.translate(0, -20.25, 0);
     cortinaIzquierdaGeo.setAttribute('uv2', new THREE.BufferAttribute(cortinaIzquierdaGeo.attributes.uv.array, 2));
     const cortinaIzquierda = new THREE.Mesh(cortinaIzquierdaGeo, cortinaMat);
-    cortinaIzquierda.position.set(28.016, 40.5, 56.046);
+    cortinaIzquierda.position.set(28.016, 48.5, 56.046);
 
     wallBackGroup.add(vidrioIzquierda, cortinaIzquierda);
 
@@ -247,10 +250,11 @@ export function createWallBack() {
     vidrioDerecha.position.set(-28.734, 28.25, 57.196);
 
     // Cortina Ventana Derecha
-    const cortinaDerechaGeo = new THREE.PlaneGeometry(22.25, 16, 1, 20);
+    const cortinaDerechaGeo = new THREE.PlaneGeometry(22.25, 40.5, 1, 20);
+    cortinaDerechaGeo.translate(0, -20.25, 0);
     cortinaDerechaGeo.setAttribute('uv2', new THREE.BufferAttribute(cortinaDerechaGeo.attributes.uv.array, 2));
     const cortinaDerecha = new THREE.Mesh(cortinaDerechaGeo, cortinaMat);
-    cortinaDerecha.position.set(-28.734, 40.5, 56.046);
+    cortinaDerecha.position.set(-28.734, 48.5, 56.046);
 
     wallBackGroup.add(vidrioDerecha, cortinaDerecha);
 
@@ -294,6 +298,20 @@ export function createWallBack() {
             child.receiveShadow = true;
         }
     });
+
+    // ================================================
+    // CONTROL DE CORTINAS (se estiran hacia abajo)
+    // ================================================
+    // escala 1 = cortina estirada (cerrada, cubre la ventana)
+    // escala 0.35 = cortina recogida arriba (abierta)
+    let objetivoCortina = 0.35;
+    wallBackGroup.userData.setCortina = (escala) => {
+        objetivoCortina = escala;
+    };
+    wallBackGroup.userData.actualizarCortina = () => {
+        cortinaIzquierda.scale.y = THREE.MathUtils.lerp(cortinaIzquierda.scale.y, objetivoCortina, 0.05);
+        cortinaDerecha.scale.y = THREE.MathUtils.lerp(cortinaDerecha.scale.y, objetivoCortina, 0.05);
+    };
 
     return wallBackGroup;
 }

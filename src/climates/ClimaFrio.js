@@ -11,7 +11,7 @@ export function createClimaFrio(scene, hemiLight = null, fillLight = null) {
     let coloresGuardados = null;
 
     // PARTICULAS DE AIRE FRIO (polvo/vaho)
-    const cantParticulas = 80;
+    const cantParticulas = 90;
     const geoms = new THREE.BufferGeometry();
     const posArr = new Float32Array(cantParticulas * 3);
     const velArr = new Float32Array(cantParticulas * 3);

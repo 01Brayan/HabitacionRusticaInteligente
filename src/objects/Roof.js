@@ -32,7 +32,7 @@ export function createRoof() {
     [techoDiffuse, techoNormal, techoRough, techoAO].forEach((tex) => {
         tex.wrapS = THREE.RepeatWrapping;
         tex.wrapT = THREE.RepeatWrapping;
-        tex.repeat.set(0, 3); 
+        tex.repeat.set(0, 3);
     });
 
     // Materiales
@@ -41,7 +41,7 @@ export function createRoof() {
         normalMap: techoNormal,
         roughnessMap: techoRough,
         aoMap: techoAO,
-        color: 0x6B4A30, 
+        color: 0x6B4A30,
         roughness: 1.0,
     });
 
@@ -60,7 +60,7 @@ export function createRoof() {
         normalMap: vigaNormal,
         roughnessMap: vigaRough,
         aoMap: vigaAO,
-        color: 0x4A3220, 
+        color: 0x4A3220,
         roughness: 1.0,
     });
 
@@ -90,7 +90,6 @@ export function createRoof() {
         [-21.014, 47.575, 25.54],  // Viga Medio-Frente
         [-21.014, 47.575, -1.46],  // Viga Centro
         [-21.014, 47.575, -28.46], // Viga Medio-Atrás
-        [-21.014, 47.575, -55.46]  // Viga Atrás (Z negativo)
     ];
     posVigasDiagDer.forEach(([x, y, z]) => {
         const viga = new THREE.Mesh(vigasDiagonalesGeo, vigasDiagonalesMat);
@@ -115,7 +114,6 @@ export function createRoof() {
         [20.271, 47.575, 25.54],  // Viga Medio-Frente
         [20.271, 47.575, -1.46],  // Viga Centro
         [20.271, 47.575, -28.46], // Viga Medio-Atrás
-        [20.271, 47.575, -55.46]  // Viga Atrás (Z negativo)
     ];
     posVigasDiagIzq.forEach(([x, y, z]) => {
         const viga = new THREE.Mesh(vigasDiagonalesGeo, vigasDiagonalesMat);
@@ -131,7 +129,6 @@ export function createRoof() {
         [-0.271, 49.157, 25.513],  // Viga Horizontal 1
         [-0.271, 49.157, -1.487],  // Viga Horizontal 2
         [-0.271, 49.157, -28.487], // Viga Horizontal 3
-        [-0.271, 49.157, -55.487]  // Viga Horizontal 4
     ];
     posVigasHoriz.forEach(([x, y, z]) => {
         const viga = new THREE.Mesh(vigasHorizontalesGeo, vigasHorizontalesMat);

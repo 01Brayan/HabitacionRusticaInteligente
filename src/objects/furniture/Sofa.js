@@ -180,12 +180,18 @@ export function createSofa() {
     // CARGA DEL MODELO 3D DE LOS COJINES (GLTF)
     // ---------------------------------------------------------------
     const loader = new GLTFLoader();
-    loader.load('src/assets/models/Sofa.glb', function (gltf) {
+    loader.load('src/assets/models/SofaVerde.glb', function (gltf) {
         const cojinesImportados = gltf.scene;
         cojinesImportados.traverse((child) => {
             if (child.isMesh) {
                 child.castShadow = true;
                 child.receiveShadow = true;
+
+                if  (child.material) {
+                    child.material.transparent = false;
+                    child.material.alphaTest = 0.5;
+                    child.material.needsUpdate = true;
+                }
             }
         });
         cojinesImportados.scale.set(1, 1, 1);

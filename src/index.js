@@ -3,6 +3,7 @@ import { createCamera } from './core/CameraManager.js';
 import { createRenderer , applyEnvironment} from './core/RendererManager.js';
 import { createLights } from './lights/Lights.js';
 import { createTimeGUI } from './ui/TimeGUI.js';
+import { createCameraController } from './ui/CameraController.js';
 
 import { setupResize } from './utils/ResizeHandler.js';
 import { startAnimation } from './animations/AnimationLoop.js';
@@ -17,6 +18,7 @@ import { createWallBack } from './objects/walls/WallBack.js';
 import { createWallRight } from './objects/walls/WallRight.js';
 import { createWallLeft } from './objects/walls/WallLeft.js';
 import {createWallWindow} from './objects/walls/WallWindow.js'
+import {createWallFront} from './objects/walls/WallFront.js'
 import * as THREE from 'three';
 
 // importar techo
@@ -24,6 +26,10 @@ import { createRoof } from './objects/Roof.js';
 
 // importar clima
 import { createClimaFrio } from './climates/ClimaFrio.js';
+
+// exterior
+import { createCesped } from './objects/exterior/Cesped.js';
+import { createTerraza } from './objects/exterior/Terraza.js';
 
 // importacion de objetos
 import { createMesaDeNoche } from './objects/furniture/MesaDeNoche.js';
@@ -60,6 +66,10 @@ applyEnvironment(scene, renderer);
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 controls.dampingFactor = 0.08;
+
+// CÁMARAS FIJAS (controlador con 4 cámaras + vista libre)
+const camController = createCameraController({ camera, controls });
+document.body.appendChild(camController.element);
 
 // AGREGAR PISO
 const floor = createFloor();
@@ -138,7 +148,16 @@ scene.add(wallLeft);
 const wallRight = createWallRight();
 wallRight.position.set(0, 0, 0);
 scene.add(wallRight);
-
+//AGREGAR PARED FRONTAL
+const wallFront = createWallFront();
+wallFront.position.set(0, 0, 0);
+scene.add(wallFront);
+//AGREGAR TERRENO EXTERIOR (cesped)
+const cesped = createCesped();
+scene.add(cesped.group);
+//AGREGAR TERRAZA EXTERIOR (frente a la puerta)
+const terraza = createTerraza();
+scene.add(terraza);
 //AGREGAR TECHO
 const roof = createRoof();
 roof.position.set(0, 0, 0);
@@ -160,11 +179,9 @@ const gui = createTimeGUI({
 document.body.appendChild(gui.element);
 
 
-
-
 // CLIMA: MODO FRIO
-const climaFrio = createClimaFrio(scene, lights.hemiLight, lights.fillLight);
-const climaUpdaters = [climaFrio.update];
+const climaFrio = createClimaFrio(scene, lights.hemiLight, lights.fillLight, cesped.material);
+const climaUpdaters = [climaFrio.update, camController.update];
 
 // Checkbox para activar/desactivar el frio
 const frioLabel = document.createElement('label');
@@ -198,7 +215,7 @@ document.body.appendChild(frioLabel);
 // ===========================================
 const ANGULO_ABIERTA = THREE.MathUtils.degToRad(120); // 120° abierta
 const HORA_INICIO_CALOR = 10;
-const HORA_FIN_CALOR = 15;
+const HORA_FIN_CALOR = 16;
 
 // Recolectar las 2 ventanas modulares de la pared izquierda
 const ventanas = [];
@@ -209,7 +226,7 @@ wallLeft.traverse((child) => {
 });
 
 function updateVentanas() {
-    // Si hace calor (10-15h) y NO esta el modo frio activo → abrir
+    // Si hace calor (10-16h) y NO esta el modo frio activo → abrir
     const haceCalor = horaActual >= HORA_INICIO_CALOR && horaActual <= HORA_FIN_CALOR && !climaFrio.state.activo;
     const objetivo = haceCalor ? ANGULO_ABIERTA : 0;
 
@@ -221,6 +238,35 @@ function updateVentanas() {
 
 // Agregar al bucle de animacion
 climaUpdaters.push(updateVentanas);
+// ===========================================
+
+// ===========================================
+// CORTINAS AUTOMATICAS (se cierran de noche o con frio)
+// ===========================================
+const ESCALA_CORTINA_ABIERTA = 0.35; // recogida arriba
+const ESCALA_CORTINA_CERRADA = 1;    // estirada, cubre la ventana
+
+// Recolectar las cortinas de la pared trasera
+const cortinas = [];
+wallBack.traverse((child) => {
+    if (child.userData && typeof child.userData.setCortina === 'function') {
+        cortinas.push(child);
+    }
+});
+
+function updateCortinas() {
+    // Cerrar cortinas de noche (19h a 7h) o si hace frio
+    const esDeNoche = horaActual >= 19 || horaActual <= 7;
+    const cerrar = esDeNoche || climaFrio.state.activo;
+    const objetivo = cerrar ? ESCALA_CORTINA_CERRADA : ESCALA_CORTINA_ABIERTA;
+
+    cortinas.forEach(c => {
+        c.userData.setCortina(objetivo); // fija el objetivo
+        c.userData.actualizarCortina();  // anima suavemente hacia el
+    });
+}
+
+climaUpdaters.push(updateCortinas);
 // ===========================================
 
 // RESPONSIVE
@@ -254,7 +300,7 @@ const allObjects = [
     cajademadera, barril, repisa, repisainf,
     ...decorations.children
 ];
-await applyLayout('src/assets/layout.json', allObjects);
+await applyLayout('src/assets/layout.json', allObjects,)
 
 // ANIMACION
 console.log('Iniciando animacion con', climaUpdaters?.length, 'updaters');

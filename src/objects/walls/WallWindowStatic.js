@@ -70,14 +70,14 @@ export function createWallWindowStatic() {
         roughness: 1.0,
     });
 
-    // Vidrio real (material físico)
+    // Vidrio real (transparente, para ver lo que hay afuera)
     const vidrioMat = new THREE.MeshPhysicalMaterial({
         color: 0xBFD9E8,
-        transmission: 0.95,
+        transparent: true,
+        opacity: 0.25,
         roughness: 0.05,
-        thickness: 0.3,
-        ior: 1.5,
         metalness: 0,
+        depthWrite: false,
     });
 
     // ========================================================
