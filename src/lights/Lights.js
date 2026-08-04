@@ -98,7 +98,7 @@ export function createLights(scene) {
     // 1. SOL
     const sunLight = new THREE.DirectionalLight(0xFFF3E0, 0);
     sunLight.castShadow = true;
-    sunLight.shadow.mapSize.set(4096,4096);
+    sunLight.shadow.mapSize.set(2048,2048);
     sunLight.shadow.camera.near = 1;
     sunLight.shadow.camera.far = 350;
     const d = 95;
