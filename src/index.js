@@ -182,9 +182,9 @@ function isFireplaceTime(hour) {
 
 let lastFireplaceAutoState = isFireplaceTime(currentHour);
 
-// CONTROL INTERACTIVO FUEGO CHIMENEA (GSAP)
+// CONTROL INTERACTIVO FUEGO CHIMENEA (estilo del GUI FRIO)
 const fuegoLabel = document.createElement('label');
-fuegoLabel.style.cssText = 'position:absolute;bottom:70px;left:20px;color:#fff;font-family:Arial;font-size:1rem;background:rgba(180, 70, 20, 0.9);padding:10px 16px;border-radius:8px;z-index:1000;display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;box-shadow: 0 4px 15px rgba(255, 100, 0, 0.3);transition: all 0.3s ease;';
+fuegoLabel.style.cssText = 'color:#fff;font-family:Arial,sans-serif;font-size:0.95rem;font-weight:600;background:rgba(18,18,28,0.85);padding:10px 16px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);display:flex;align-items:center;gap:8px;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.4);transition:all 0.3s;position:fixed;bottom:70px;left:20px;z-index:10000;user-select:none;';
 
 const fuegoCheck = document.createElement('input');
 fuegoCheck.type = 'checkbox';
@@ -195,7 +195,6 @@ fuegoCheck.style.cursor = 'pointer';
 
 if (!fuegoCheck.checked) {
     fuegoLabel.style.background = 'rgba(18, 18, 28, 0.85)';
-    fuegoLabel.style.boxShadow = 'none';
 }
 
 if (typeof chiminea.userData?.toggleFuego === 'function') {
@@ -209,15 +208,15 @@ fuegoCheck.addEventListener('change', () => {
     }
     if (isChecked) {
         fuegoLabel.style.background = 'rgba(180, 70, 20, 0.9)';
-        fuegoLabel.style.boxShadow = '0 4px 15px rgba(255, 100, 0, 0.3)';
+        fuegoLabel.style.borderColor = 'rgba(255, 150, 60, 0.4)';
     } else {
         fuegoLabel.style.background = 'rgba(18, 18, 28, 0.85)';
-        fuegoLabel.style.boxShadow = 'none';
+        fuegoLabel.style.borderColor = 'rgba(255,255,255,0.15)';
     }
 });
 
 const fuegoText = document.createElement('span');
-fuegoText.textContent = '🔥 Encender Chimenea';
+fuegoText.textContent = 'CHIMENEA';
 
 fuegoLabel.appendChild(fuegoCheck);
 fuegoLabel.appendChild(fuegoText);
@@ -342,9 +341,9 @@ const oldCurtainObjects = [];
 decorations.traverse((child) => {
     const nameLower = (child.name || '').toLowerCase();
     if (
-        nameLower.includes('cortina') || 
-        nameLower.includes('pplane') || 
-        nameLower.includes('plane') || 
+        nameLower.includes('cortina') ||
+        nameLower.includes('pplane') ||
+        nameLower.includes('plane') ||
         nameLower.includes('polysurface')
     ) {
         oldCurtainObjects.push(child);
@@ -381,24 +380,19 @@ const cortinas = createAllCortinas();
 scene.add(cortinas.group);
 climaUpdaters.push(cortinas.update);
 
-// PANEL DE CONTROLES INFERIOR IZQUIERDA (UI)
-const controlsUI = document.createElement('div');
-controlsUI.style.cssText = 'position:fixed;bottom:20px;left:20px;z-index:10000;display:flex;align-items:center;gap:12px;user-select:none;';
+// CONTROL DE CORTINAS AUTOMATICAS (como las de WallBack):
+// se cierran de noche o con FRIO, y se abren de dia sin frio
+function updateCortinasTela() {
+    const esDeNoche = horaActual >= 19 || horaActual <= 7;
+    const cerrar = esDeNoche || climaFrio.state.activo;
+    if (cerrar && cortinas.isOpen()) cortinas.closeAll();
+    if (!cerrar && !cortinas.isOpen()) cortinas.openAll();
+}
+climaUpdaters.push(updateCortinasTela);
 
-// 2. Botón Abrir / Cerrar Cortinas
-const cortinasBtn = document.createElement('button');
-cortinasBtn.style.cssText = 'color:#fff;font-family:Arial,sans-serif;font-size:0.95rem;font-weight:600;background:rgba(18,18,28,0.85);padding:10px 18px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.4);transition:all 0.3s;display:flex;align-items:center;gap:8px;';
-cortinasBtn.innerHTML = '<span>🪟</span><span id="btnCortinasText">ABRIR CORTINAS</span>';
-
-const updateBtnState = (isOpen) => {
-    const textEl = cortinasBtn.querySelector('#btnCortinasText');
-    if (textEl) textEl.textContent = isOpen ? 'CERRAR CORTINAS' : 'ABRIR CORTINAS';
-    cortinasBtn.style.background = isOpen ? 'rgba(120, 70, 160, 0.9)' : 'rgba(18, 18, 28, 0.85)';
-};
-
-// 1. Control Clima Frío
+// CHECKBOX FRIO (abajo-izquierda)
 const frioLabel = document.createElement('label');
-frioLabel.style.cssText = 'color:#fff;font-family:Arial,sans-serif;font-size:0.95rem;font-weight:600;background:rgba(18,18,28,0.85);padding:10px 16px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);display:flex;align-items:center;gap:8px;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.4);transition:all 0.3s;';
+frioLabel.style.cssText = 'position:fixed;bottom:20px;left:20px;color:#fff;font-family:Arial,sans-serif;font-size:0.95rem;font-weight:600;background:rgba(18,18,28,0.85);padding:10px 16px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);display:flex;align-items:center;gap:8px;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.4);transition:all 0.3s;z-index:10000;user-select:none;';
 
 const frioCheck = document.createElement('input');
 frioCheck.type = 'checkbox';
@@ -415,43 +409,16 @@ frioCheck.addEventListener('change', () => {
             fuegoCheck.checked = true;
             fuegoCheck.dispatchEvent(new Event('change'));
         }
-        // Al activar el modo FRÍO, cerrar las cortinas automáticamente solo si están abiertas
-        if (cortinas.isOpen()) {
-            cortinas.closeAll();
-            updateBtnState(false);
-        }
     } else {
         frioLabel.style.background = 'rgba(18, 18, 28, 0.85)';
     }
 });
 
 const frioText = document.createElement('span');
-frioText.textContent = 'FRÍO';
+frioText.textContent = 'FRIO';
 frioLabel.appendChild(frioCheck);
 frioLabel.appendChild(frioText);
-controlsUI.appendChild(frioLabel);
-
-cortinasBtn.addEventListener('click', () => {
-    const isOpen = cortinas.toggleAll();
-    updateBtnState(isOpen);
-});
-controlsUI.appendChild(cortinasBtn);
-document.body.appendChild(controlsUI);
-
-// Raycaster para interactuar al hacer clic directamente sobre cualquier cortina 3D
-const raycaster = new THREE.Raycaster();
-const mouse = new THREE.Vector2();
-window.addEventListener('click', (event) => {
-    if (event.target.tagName !== 'CANVAS') return;
-    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-    raycaster.setFromCamera(mouse, camera);
-    const intersects = raycaster.intersectObjects(cortinas.group.children, true);
-    if (intersects.length > 0) {
-        const isOpen = cortinas.toggleAll();
-        updateBtnState(isOpen);
-    }
-});
+document.body.appendChild(frioLabel);
 
 // ANIMACION
 startAnimation(

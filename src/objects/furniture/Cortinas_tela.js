@@ -9,11 +9,18 @@ export function createCortinaInstance(config = {}) {
 
     const textureLoader = new THREE.TextureLoader();
 
-    // Cargar textura de difuso
-    const diffuseMap = textureLoader.load('src/assets/textures/curtains/difuse/difuse_2k.jpg');
+    // Textura de tela (linen) - misma receta que las cortinas de WallBack
+    const diffuseMap = textureLoader.load('src/assets/textures/linen/linen_diff_2k.jpg');
+    const normalMap  = textureLoader.load('src/assets/textures/linen/linen_nor_gl_2k.jpg');
+    const roughMap   = textureLoader.load('src/assets/textures/linen/linen_rough_2k.jpg');
+    const aoMap      = textureLoader.load('src/assets/textures/linen/linen_ao_2k.jpg');
+
     diffuseMap.colorSpace = THREE.SRGBColorSpace;
-    diffuseMap.wrapS = THREE.RepeatWrapping;
-    diffuseMap.wrapT = THREE.RepeatWrapping;
+    [diffuseMap, normalMap, roughMap, aoMap].forEach((tex) => {
+        tex.wrapS = THREE.RepeatWrapping;
+        tex.wrapT = THREE.RepeatWrapping;
+        tex.repeat.set(2, 2);
+    });
 
     // En lugar de usar el GLB, creamos la geometría de forma procedimental
     // para evitar capas extra y mejorar el rendimiento.
@@ -27,9 +34,15 @@ export function createCortinaInstance(config = {}) {
     
     const material = new THREE.MeshStandardMaterial({
         map: diffuseMap,
-        roughness: 0.85,
-        metalness: 0.05,
+        normalMap: normalMap,
+        roughnessMap: roughMap,
+        aoMap: aoMap,
+        color: 0xD9CFB8,      // tono crema/lino, como WallBack
+        roughness: 0.9,
         side: THREE.DoubleSide,
+        transparent: true,
+        opacity: 0.9,
+        depthWrite: false,
     });
 
     const modelWrapper = new THREE.Group();

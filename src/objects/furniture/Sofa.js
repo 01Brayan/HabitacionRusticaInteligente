@@ -180,7 +180,7 @@ export function createSofa() {
     // CARGA DEL MODELO 3D DE LOS COJINES (GLTF)
     // ---------------------------------------------------------------
     const loader = new GLTFLoader();
-    loader.load('src/assets/models/SofaVerde.glb', function (gltf) {
+    loader.load('src/assets/models/Sofa.glb', function (gltf) {
         const cojinesImportados = gltf.scene;
         cojinesImportados.traverse((child) => {
             if (child.isMesh) {

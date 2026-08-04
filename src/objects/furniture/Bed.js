@@ -24,7 +24,7 @@ export function createBed() {
     const maderaMat = new THREE.MeshStandardMaterial({
         map: maderaDiffuse,
         normalMap: maderaNormal,
-        normalScale: new THREE.Vector2(1.0, 1.0), 
+        normalScale: new THREE.Vector2(1.0, 1.0),
         roughnessMap: maderaRough,
         color: 0x3D2C1E,
         roughness: 1,
@@ -35,7 +35,7 @@ export function createBed() {
         normalMap: maderaNormal,
         normalScale: new THREE.Vector2(1.0, 1.0),
         roughnessMap: maderaRough,
-        color: 0x6E5A3E, 
+        color: 0x6E5A3E,
         roughness: 1,
     });
 
@@ -136,7 +136,7 @@ export function createBed() {
     // ---------------------------------------------------------------
     // 5. CARGA DEL MODELO 3D DEL COLCHÓN (GLTF)
     const loader = new GLTFLoader();
-    loader.load('src/assets/models/BedWhite1.glb', function (gltf) {
+    loader.load('src/assets/models/BedWhite.glb', function (gltf) {
         const colchonImportado = gltf.scene;
         colchonImportado.traverse((child) => {
             if (child.isMesh) {
