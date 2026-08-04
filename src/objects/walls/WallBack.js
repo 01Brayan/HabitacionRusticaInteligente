@@ -225,7 +225,7 @@ export function createWallBack() {
     wallBackGroup.add(vidrioIzquierda, cortinaIzquierda);
 
     // ---------------------------------------------------------------
-    // 5. VENTANA DERECHA Y SUS DETALLES (Vidrio, Marcos y Cortina)
+    // 5. VENTANA DERECHA Y SUS DETALLES (Vidrio y Marcos)
     // ---------------------------------------------------------------
     // Marcos exteriores e interiores de la Ventana Derecha
     const marcosDerConfig = [
