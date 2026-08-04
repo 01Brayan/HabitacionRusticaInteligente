@@ -2,6 +2,7 @@
 // CHIMENEA DE PIEDRA Y MADERA
 // ===============================================================
 import * as THREE from 'three';
+import { createTroncoFuego } from './Tronco_fuego.js';
 
 export function createChimenea() {
     const chimeneaGroup = new THREE.Group();
@@ -67,8 +68,10 @@ export function createChimenea() {
     });
 
     const hogarInteriorMat = new THREE.MeshStandardMaterial({
-        color: 0x0a0a0a,
-        roughness: 1,
+        color: 0x221c17,
+        roughness: 0.85,
+        map: piedraDiffuse,
+        normalMap: piedraNormal
     });
 
     // ---------------------------------------------------------------
@@ -325,11 +328,12 @@ export function createChimenea() {
     chimeneaGroup.add(paredCentralSuperior, maderaSuperiNivel1, maderaSuperiNivel2, maderaSuperiNivel3, paredInferior, paredSuperior);
 
     // ---------------------------------------------------------------
-    // 8. LUZ CÁLIDA DEL FUEGO
+    // 8. TRONCOS 3D Y FUEGO ANIMADO (PARTÍCULAS Y LUZ PARPADEANTE)
     // ---------------------------------------------------------------
-    const fuegoLuz = new THREE.PointLight(0xff6b1a, 1.5, 4, 2);
-    fuegoLuz.position.set(0, 1, 0.6);
-    chimeneaGroup.add(fuegoLuz);
+    const troncoFuegoComponent = createTroncoFuego();
+    chimeneaGroup.add(troncoFuegoComponent.group);
+    chimeneaGroup.userData.updateFuego = troncoFuegoComponent.update;
+    chimeneaGroup.userData.toggleFuego = troncoFuegoComponent.toggle;
 
     // --esto fue modificado: Recorrido para activar sombras en todas las piezas de la chimenea
     chimeneaGroup.traverse((child) => {
