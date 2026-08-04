@@ -291,11 +291,11 @@ climaUpdaters.push(updateVentanas);
 const ESCALA_CORTINA_ABIERTA = 0.35; // recogida arriba
 const ESCALA_CORTINA_CERRADA = 1;    // estirada, cubre la ventana
 
-// Recolectar las cortinas de la pared trasera
-const cortinas = [];
+// Recolectar las cortinas de la pared trasera (Brayan: automaticas de noche/frio)
+const cortinasWallBack = [];
 wallBack.traverse((child) => {
     if (child.userData && typeof child.userData.setCortina === 'function') {
-        cortinas.push(child);
+        cortinasWallBack.push(child);
     }
 });
 
@@ -305,7 +305,7 @@ function updateCortinas() {
     const cerrar = esDeNoche || climaFrio.state.activo;
     const objetivo = cerrar ? ESCALA_CORTINA_CERRADA : ESCALA_CORTINA_ABIERTA;
 
-    cortinas.forEach(c => {
+    cortinasWallBack.forEach(c => {
         c.userData.setCortina(objetivo); // fija el objetivo
         c.userData.actualizarCortina();  // anima suavemente hacia el
     });
