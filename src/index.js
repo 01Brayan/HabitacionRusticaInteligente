@@ -42,6 +42,7 @@ import { createRepisaInferior, createRepisaSuperior } from './objects/furniture/
 // import de las decoraciones
 import { createDecorations } from './objects/decorations/Decorations.js';
 import { applyLayout } from './utils/LayoutLoader.js';
+import { createAllCortinas } from './objects/furniture/Cortinas_tela.js';
 
 // sistema de luces interiores (lámparas + candelabro)
 import { InteriorLightsManager, hourToDarkness } from './lights/InteriorLightsManager.js';
@@ -232,37 +233,6 @@ const climaUpdaters = [
     chiminea.userData?.updateFuego
 ].filter(Boolean);
 
-// Checkbox para activar/desactivar el frio
-const frioLabel = document.createElement('label');
-frioLabel.style.cssText = 'position:absolute;bottom:20px;left:20px;color:#fff;font-family:Arial;font-size:1rem;background:rgba(18,18,28,0.85);padding:10px 16px;border-radius:8px;z-index:1000;display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;';
-
-const frioCheck = document.createElement('input');
-frioCheck.type = 'checkbox';
-frioCheck.style.width = '18px';
-frioCheck.style.height = '18px';
-frioCheck.style.cursor = 'pointer';
-
-frioCheck.addEventListener('change', () => {
-    climaFrio.toggle();
-    if (climaFrio.state.activo) {
-        frioLabel.style.background = 'rgba(58, 100, 150, 0.9)';
-        // Al activar el modo FRIO, encender automáticamente el fuego de la chimenea si estaba apagado
-        if (!fuegoCheck.checked) {
-            fuegoCheck.checked = true;
-            fuegoCheck.dispatchEvent(new Event('change'));
-        }
-    } else {
-        frioLabel.style.background = 'rgba(18, 18, 28, 0.85)';
-    }
-});
-
-const frioText = document.createElement('span');
-frioText.textContent = 'FRIO';
-
-frioLabel.appendChild(frioCheck);
-frioLabel.appendChild(frioText);
-document.body.appendChild(frioLabel);
-// FIN CLIMA
 
 // RESPONSIVE
 setupResize(camera, renderer);
@@ -286,6 +256,27 @@ repisainf.name = 'repisainf';
 
 // AGREGAR DECORACIONES (objetos importados de Blender)
 const decorations = await createDecorations();
+
+// Ocultar / remover absolutamente todas las cortinas y paneles antiguos (cortina, pplane, plane, polysurface) de Decorations.glb
+const oldCurtainObjects = [];
+decorations.traverse((child) => {
+    const nameLower = (child.name || '').toLowerCase();
+    if (
+        nameLower.includes('cortina') || 
+        nameLower.includes('pplane') || 
+        nameLower.includes('plane') || 
+        nameLower.includes('polysurface')
+    ) {
+        oldCurtainObjects.push(child);
+    }
+});
+oldCurtainObjects.forEach((child) => {
+    child.visible = false;
+    if (child.parent) {
+        child.removeFromParent();
+    }
+});
+
 scene.add(decorations);
 
 // Lista de todos los objetos que pueden tener layout guardado y/o luz interior
@@ -305,6 +296,83 @@ await applyLayout('src/assets/layout.json', allObjects, scene);
 
 // Registrar las luces de los duplicados recién creados
 interiorLights.refresh(allObjects);
+
+// AGREGAR CORTINAS 3D EN LAS VENTANAS LATERALES
+const cortinas = createAllCortinas();
+scene.add(cortinas.group);
+climaUpdaters.push(cortinas.update);
+
+// PANEL DE CONTROLES INFERIOR IZQUIERDA (UI)
+const controlsUI = document.createElement('div');
+controlsUI.style.cssText = 'position:fixed;bottom:20px;left:20px;z-index:10000;display:flex;align-items:center;gap:12px;user-select:none;';
+
+// 2. Botón Abrir / Cerrar Cortinas
+const cortinasBtn = document.createElement('button');
+cortinasBtn.style.cssText = 'color:#fff;font-family:Arial,sans-serif;font-size:0.95rem;font-weight:600;background:rgba(18,18,28,0.85);padding:10px 18px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.4);transition:all 0.3s;display:flex;align-items:center;gap:8px;';
+cortinasBtn.innerHTML = '<span>🪟</span><span id="btnCortinasText">ABRIR CORTINAS</span>';
+
+const updateBtnState = (isOpen) => {
+    const textEl = cortinasBtn.querySelector('#btnCortinasText');
+    if (textEl) textEl.textContent = isOpen ? 'CERRAR CORTINAS' : 'ABRIR CORTINAS';
+    cortinasBtn.style.background = isOpen ? 'rgba(120, 70, 160, 0.9)' : 'rgba(18, 18, 28, 0.85)';
+};
+
+// 1. Control Clima Frío
+const frioLabel = document.createElement('label');
+frioLabel.style.cssText = 'color:#fff;font-family:Arial,sans-serif;font-size:0.95rem;font-weight:600;background:rgba(18,18,28,0.85);padding:10px 16px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);display:flex;align-items:center;gap:8px;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.4);transition:all 0.3s;';
+
+const frioCheck = document.createElement('input');
+frioCheck.type = 'checkbox';
+frioCheck.style.width = '18px';
+frioCheck.style.height = '18px';
+frioCheck.style.cursor = 'pointer';
+
+frioCheck.addEventListener('change', () => {
+    climaFrio.toggle();
+    if (climaFrio.state.activo) {
+        frioLabel.style.background = 'rgba(58, 100, 150, 0.9)';
+        // Al activar el modo FRIO, encender automáticamente el fuego de la chimenea si estaba apagado
+        if (!fuegoCheck.checked) {
+            fuegoCheck.checked = true;
+            fuegoCheck.dispatchEvent(new Event('change'));
+        }
+        // Al activar el modo FRÍO, cerrar las cortinas automáticamente solo si están abiertas
+        if (cortinas.isOpen()) {
+            cortinas.closeAll();
+            updateBtnState(false);
+        }
+    } else {
+        frioLabel.style.background = 'rgba(18, 18, 28, 0.85)';
+    }
+});
+
+const frioText = document.createElement('span');
+frioText.textContent = 'FRÍO';
+frioLabel.appendChild(frioCheck);
+frioLabel.appendChild(frioText);
+controlsUI.appendChild(frioLabel);
+
+cortinasBtn.addEventListener('click', () => {
+    const isOpen = cortinas.toggleAll();
+    updateBtnState(isOpen);
+});
+controlsUI.appendChild(cortinasBtn);
+document.body.appendChild(controlsUI);
+
+// Raycaster para interactuar al hacer clic directamente sobre cualquier cortina 3D
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
+window.addEventListener('click', (event) => {
+    if (event.target.tagName !== 'CANVAS') return;
+    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+    raycaster.setFromCamera(mouse, camera);
+    const intersects = raycaster.intersectObjects(cortinas.group.children, true);
+    if (intersects.length > 0) {
+        const isOpen = cortinas.toggleAll();
+        updateBtnState(isOpen);
+    }
+});
 
 // ANIMACION
 startAnimation(

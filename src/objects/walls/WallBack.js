@@ -213,16 +213,10 @@ export function createWallBack() {
     const vidrioIzquierda = new THREE.Mesh(vidrioIzquierdaGeo, vidrioMat);
     vidrioIzquierda.position.set(28.016, 28.25, 57.196);
 
-    // Cortina Ventana Izquierda
-    const cortinaIzquierdaGeo = new THREE.PlaneGeometry(22.25, 16, 1, 20);
-    cortinaIzquierdaGeo.setAttribute('uv2', new THREE.BufferAttribute(cortinaIzquierdaGeo.attributes.uv.array, 2));
-    const cortinaIzquierda = new THREE.Mesh(cortinaIzquierdaGeo, cortinaMat);
-    cortinaIzquierda.position.set(28.016, 40.5, 56.046);
-
-    wallBackGroup.add(vidrioIzquierda, cortinaIzquierda);
+    wallBackGroup.add(vidrioIzquierda);
 
     // ---------------------------------------------------------------
-    // 5. VENTANA DERECHA Y SUS DETALLES (Vidrio, Marcos y Cortina)
+    // 5. VENTANA DERECHA Y SUS DETALLES (Vidrio y Marcos)
     // ---------------------------------------------------------------
     // Marcos exteriores e interiores de la Ventana Derecha
     const marcosDerConfig = [
@@ -246,13 +240,7 @@ export function createWallBack() {
     const vidrioDerecha = new THREE.Mesh(vidrioDerechaGeo, vidrioMat);
     vidrioDerecha.position.set(-28.734, 28.25, 57.196);
 
-    // Cortina Ventana Derecha
-    const cortinaDerechaGeo = new THREE.PlaneGeometry(22.25, 16, 1, 20);
-    cortinaDerechaGeo.setAttribute('uv2', new THREE.BufferAttribute(cortinaDerechaGeo.attributes.uv.array, 2));
-    const cortinaDerecha = new THREE.Mesh(cortinaDerechaGeo, cortinaMat);
-    cortinaDerecha.position.set(-28.734, 40.5, 56.046);
-
-    wallBackGroup.add(vidrioDerecha, cortinaDerecha);
+    wallBackGroup.add(vidrioDerecha);
 
     // ---------------------------------------------------------------
     // 6. DETALLES DE SOPORTE DE PIEDRA BAJO LOS PILARES

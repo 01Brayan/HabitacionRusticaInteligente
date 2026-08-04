@@ -16,13 +16,14 @@ export function startAnimation(
 
         const delta = clock.getDelta();
 
+        // Actualiza los controles del mouse en cada frame
         if (controls && typeof controls.update === 'function') {
             controls.update();
         }
 
         climateUpdaters.forEach((updater) => {
             if (typeof updater === 'function') {
-                updater();
+                updater(delta);
             }
         });
 
