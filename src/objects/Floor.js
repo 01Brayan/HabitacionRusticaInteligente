@@ -44,7 +44,7 @@ export function createFloor() {
         normalMap: normalMap,
         roughnessMap: roughMap,
         aoMap: aoMap,
-        color: 0x3E2817, // <-- tu tinte de color definido para el piso
+        color: 0x5C4033, // <-- tu tinte de color definido para el piso
         roughness: 1.0,  // en 1.0 porque el roughMap ya trae la variación real
     });
 
