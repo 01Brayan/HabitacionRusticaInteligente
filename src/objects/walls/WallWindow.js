@@ -237,14 +237,12 @@ export function createWallWindow() {
         objetivoIzq = angulo;
     };
     wallGroup.userData.actualizar = () => {
-        // lerp: mueve el angulo actual suavemente hacia el objetivo
         pivotIzq.rotation.y = THREE.MathUtils.lerp(pivotIzq.rotation.y, objetivoIzq, 0.05);
         pivotDer.rotation.y = THREE.MathUtils.lerp(pivotDer.rotation.y, -objetivoIzq, 0.05);
     };
     wallGroup.userData.pivotIzq = pivotIzq;
     wallGroup.userData.pivotDer = pivotDer;
 
-    // --esto fue modificado: Recorrido para activar sombras en maderas, evitando que el vidrio transparente proyecte sombra opaca
     wallGroup.traverse((child) => {
         if (child.isMesh) {
             if (child.material === vidrioMat) {

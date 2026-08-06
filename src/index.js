@@ -1,11 +1,4 @@
 // ================================================================
-//  ARCHIVO PRINCIPAL DEL PROYECTO (index.js)
-// ================================================================
-//  Este archivo es el "director de orquesta": importa todos los
-//  módulos, crea la escena, agrega cada objeto y conecta los
-//  sistemas dinámicos (hora, clima, ventanas, cortinas, cámaras).
-//
-//  GUÍA RÁPIDA DE SECCIONES (borrar estos comentarios después):
 //  1. IMPORTACIONES      -> carga todos los módulos
 //  2. ESCENA/CÁMARA      -> crea la base 3D
 //  3. PISO Y MUEBLES     -> agrega los objetos de la habitación
@@ -22,7 +15,7 @@
 // ================================================================
 
 // ================================================================
-// 1. IMPORTACIONES (se cargan los módulos de todo el proyecto)
+// 1. IMPORTACIONES
 // ================================================================
 import { createScene } from './core/SceneManager.js';       // crea la escena
 import { createCamera } from './core/CameraManager.js';     // crea la cámara
@@ -34,7 +27,6 @@ import { setupResize } from './utils/ResizeHandler.js';     // ajusta al redimen
 import { startAnimation } from './animations/AnimationLoop.js'; // bucle de animación
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'; // vista libre con mouse
 import * as THREE from 'three';
-
 // --- Muebles de la habitación ---
 import { createBed } from './objects/furniture/Bed.js';
 import { createMesaDeNoche } from './objects/furniture/MesaDeNoche.js';
@@ -49,8 +41,7 @@ import { createTapeteRojo } from './objects/furniture/TapeteRojo.js';
 import { createCaja } from './objects/furniture/Caja.js';
 import { createBarril } from './objects/furniture/Barril.js';
 import { createRepisaInferior, createRepisaSuperior } from './objects/furniture/Repisa.js';
-import { createAllCortinas } from './objects/furniture/Cortinas_tela.js'; // cortinas de tela (Griselda)
-
+import { createAllCortinas } from './objects/furniture/Cortinas_tela.js'; // cortinas de tela
 // --- Piso, paredes y techo ---
 import { createFloor } from './objects/Floor.js';
 import { createWallBack } from './objects/walls/WallBack.js';
@@ -59,17 +50,14 @@ import { createWallLeft } from './objects/walls/WallLeft.js';
 import { createWallWindow } from './objects/walls/WallWindow.js';
 import { createWallFront } from './objects/walls/WallFront.js';
 import { createRoof } from './objects/Roof.js';
-
 // --- Exterior ---
 import { createCesped } from './objects/exterior/Cesped.js'; // césped
 import { createTerraza } from './objects/exterior/Terraza.js'; // terraza de madera
-
 // --- Decoraciones y clima ---
 import { createDecorations } from './objects/decorations/Decorations.js'; // decoraciones GLB
 import { applyLayout } from './utils/LayoutLoader.js'; // carga posiciones guardadas
 import { createClimaFrio } from './climates/ClimaFrio.js'; // modo FRIO
-
-// --- Luces interiores de los objetos (Compañero Luis) ---
+// --- Luces interiores de los objetos ---
 import { InteriorLightsManager, hourToDarkness } from './lights/InteriorLightsManager.js';
 
 // ================================================================
@@ -193,12 +181,6 @@ scene.add(terraza);
 // ================================================================
 const lights = createLights(scene);
 
-// Variables globales de hora (compartidas por varios sistemas)
-//   horaActual -> usada por ventanas, cortinas y cámaras (Brayan)
-//   currentHour -> usada por la chimenea automática (Waldimar)
-let horaActual = 7;
-let currentHour = 7;
-
 // ================================================================
 // 7. CHIMENEA (fuego automático + control manual) — Waldimar
 //    Se enciende sola en horarios fríos (5-8 AM y 17:30+)
@@ -251,7 +233,12 @@ document.body.appendChild(fuegoLabel);
 
 // ================================================================
 // 8. INTERFAZ DE HORA DEL DÍA (slider)
+//    horaActual -> usada por ventanas, cortinas y cámaras (Brayan)
+//    currentHour -> usada por la chimenea automática (Waldimar)
 // ================================================================
+let horaActual = 7;
+let currentHour = 7;
+
 const gui = createTimeGUI({
     min: 5,
     max: 20,

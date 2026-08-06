@@ -1,34 +1,22 @@
 import * as THREE from 'three';
 import { Sky } from 'three/addons/objects/Sky.js';
 
-// Puntos clave del sol. "hour" en formato 0-24 (podés usar decimales, ej: 6.5 = 6:30am)
-// ============================================================
-// 📌 CÓMO AJUSTAR COLORES TÚ MISMO:
-//    El color está en hex 0xRRGGBB. Para obtener un tono:
-//    - Googleá "color picker" y elegí un color
-//    - Tomá los valores R, G, B (0-255) y convertilos a hex:
-//      Ej: R=255, G=180, B=80 → 0xffb450
-// ============================================================
+// Puntos clave del sol. "hour" en formato 0-24
 const SUN_KEYFRAMES = [
     { hour: 0,    color: 0x0a0e1a, intensity: 0.0 },
-    { hour: 5,    color: 0x0a0e1a, intensity: 0.0 },   // 5 AM: noche, sol bajo tierra
-    { hour: 8,    color: 0x8db4e8, intensity: 4.5 },   // 8 AM: mañana azul brillante
-    { hour: 11,   color: 0xffbb5e, intensity: 6.5 },   // 11 AM: dorado suave
-    { hour: 14,   color: 0xffc46a, intensity: 6.0 },   // 2 PM: "color piel" dorado-peach
-    { hour: 16.5, color: 0xff6b1a , intensity: 5.0 },   // 4:30 PM: naranja
-    { hour: 20,   color: 0x5c7097, intensity: 0 },   // 8 PM: rojo atardecer
+    { hour: 5,    color: 0x0a0e1a, intensity: 0.0 },
+    { hour: 8,    color: 0x8db4e8, intensity: 4.5 },
+    { hour: 11,   color: 0xffbb5e, intensity: 6.5 },
+    { hour: 14,   color: 0xffc46a, intensity: 6.0 },
+    { hour: 16.5, color: 0xff6b1a , intensity: 5.0 },
+    { hour: 20,   color: 0x5c7097, intensity: 0 },
     { hour: 21,   color: 0x0a0e1a, intensity: 0.0 },
     { hour: 24,   color: 0x0a0e1a, intensity: 0.0 },
 ];
 
 // Cielo (sky) y tierra (ground) de la luz hemisférica.
 // Esta luz es la que REBOTA del entorno y tiñe la madera de la casa.
-// ============================================================
-// 📌 PARA CAMBIAR EL TONO DE LA CASA:
-//    - sky → color del cielo (ilumina desde arriba)
-//    - ground → color del suelo (ilumina desde abajo, tiñe la madera)
-//    - intensity → qué tan fuerte es este rebote
-// ============================================================
+
 const HEMI_KEYFRAMES = [
     { hour: 0,   sky: 0x0a0e1a, ground: 0x010103, intensity: 0.03 },
     { hour: 5,   sky: 0x040712, ground: 0x010103, intensity: 0.05 },
@@ -160,7 +148,6 @@ export function createLights(scene) {
         //    - Y > 10 → luz al 100%
         //    - Y entre -5 y 10 → crepúsculo gradual
         //    - Y < -5 → noche, intensidad 0
-        // 📌 Si querés que el día dure más o menos, cambiá estos -5 y 10
         const yFade = THREE.MathUtils.smoothstep(sunPos.y, -5, 10);
         sunLight.intensity = Math.max(sun.intensity, 0) * yFade;
 
