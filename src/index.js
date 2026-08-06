@@ -180,7 +180,8 @@ scene.add(terraza);
 // 6. LUCES (sol, luna y cielo procedural)
 // ================================================================
 const lights = createLights(scene);
-
+let horaActual = 7;
+let currentHour = 7;
 // ================================================================
 // 7. CHIMENEA (fuego automático + control manual) — Waldimar
 //    Se enciende sola en horarios fríos (5-8 AM y 17:30+)
@@ -233,11 +234,8 @@ document.body.appendChild(fuegoLabel);
 
 // ================================================================
 // 8. INTERFAZ DE HORA DEL DÍA (slider)
-//    horaActual -> usada por ventanas, cortinas y cámaras (Brayan)
-//    currentHour -> usada por la chimenea automática (Waldimar)
 // ================================================================
-let horaActual = 7;
-let currentHour = 7;
+
 
 const gui = createTimeGUI({
     min: 5,
