@@ -1,9 +1,12 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
-// Genera una textura de cesped procedural (sin archivos externos).
-// Se dibujan millones de "briznas" verdes con variacion de tono
-// para simular pasto. La textura queda lista para repetirse.
+// Paletas de colores fijas
+const VERDES = ['#3a5a24', '#4a7030', '#557a33', '#2f4a1d', '#6a8a3a'];
+const TIERRAS = ['#3d2b1a', '#4a3523', '#553d28', '#2e2112'];
+
+// Genera una textura de césped procedural (sin archivos externos).
+// Se dibujan parches de tierra y briznas de pasto con colores de las paletas.
 function generarTexturaCesped() {
     const size = 256;
     const canvas = document.createElement('canvas');
@@ -11,39 +14,33 @@ function generarTexturaCesped() {
     canvas.height = size;
     const ctx = canvas.getContext('2d');
 
-    // Base verde-oliva oscura y apagada (antes: #0f4620, muy saturado/frío)
+    // 1. Base verde-oliva
     ctx.fillStyle = '#2b3620';
     ctx.fillRect(0, 0, size, size);
 
-    // Parches de tierra/hojas secas — rompe la uniformidad "cesped de cancha"
+    // 2. Parches de tierra (un color café al azar de la paleta)
     for (let i = 0; i < 300; i++) {
-        const x = Math.random() * size;
-        const y = Math.random() * size;
-        const tonoTierra = 25 + Math.random() * 20; // café-ocre
-        ctx.fillStyle = `hsla(${tonoTierra}, 35%, ${18 + Math.random() * 10}%, ${0.2 + Math.random() * 0.3})`;
+        ctx.fillStyle = TIERRAS[(Math.random() * TIERRAS.length) | 0];
+        ctx.globalAlpha = 0.2 + Math.random() * 0.3;
         ctx.beginPath();
-        ctx.arc(x, y, 3 + Math.random() * 6, 0, Math.PI * 2);
+        ctx.arc(Math.random() * size, Math.random() * size, 3 + Math.random() * 6, 0, Math.PI * 2);
         ctx.fill();
     }
 
-    // Briznas de pasto — rango de tono más cálido (evita el verde-azulado artificial)
-    // y saturación/luminosidad más bajas (look apagado, no "cancha de fútbol")
+    // 3. Briznas de pasto (un color verde al azar de la paleta)
+    ctx.globalAlpha = 1;
     for (let i = 0; i < 4000; i++) {
-        const x = Math.random() * size;
-        const y = Math.random() * size;
-        const tono = 65 + Math.random() * 40;   // antes 90-170 (cruzaba a turquesa) -> ahora 65-105 (amarillo-verde a verde)
-        const sat = 25 + Math.random() * 20;    // antes 60% fijo -> ahora 25-45%, más apagado
-        const luz = 20 + Math.random() * 18;    // controla directamente el brillo, antes dependía solo del alpha
-        const alpha = 0.35 + Math.random() * 0.5;
-        ctx.fillStyle = `hsla(${tono}, ${sat}%, ${luz}%, ${alpha})`;
-        ctx.fillRect(x, y, 2, 4 + Math.random() * 5);
+        ctx.fillStyle = VERDES[(Math.random() * VERDES.length) | 0];
+        ctx.globalAlpha = 0.35 + Math.random() * 0.5;
+        ctx.fillRect(Math.random() * size, Math.random() * size, 2, 4 + Math.random() * 5);
     }
+    ctx.globalAlpha = 1;
 
     const texture = new THREE.CanvasTexture(canvas);
     texture.wrapS = THREE.RepeatWrapping;
     texture.wrapT = THREE.RepeatWrapping;
-    texture.repeat.set(20, 20); // repetir para cubrir el terreno grande
-    texture.colorSpace = THREE.SRGBColorSpace; // faltaba — sin esto el canvas se interpreta con gamma incorrecto
+    texture.repeat.set(20, 20);
+    texture.colorSpace = THREE.SRGBColorSpace;
     return texture;
 }
 
@@ -52,15 +49,10 @@ export function createCesped() {
 
     const cespedMat = new THREE.MeshStandardMaterial({
         map: generarTexturaCesped(),
-        // Antes 0xffffff dejaba pasar el 100% de saturación de la textura.
-        // Este tono cálido y ligeramente desaturado "calma" el verde final,
-        // sin taparlo — funciona como un filtro suave, no como tinte fuerte.
         color: 0xdcd6b8,
         roughness: 1.0,
     });
 
-    // El cesped es una caja grande que simula el terreno exterior.
-    // AJUSTA estas medidas y posicion a tu gusto:
     const cespedGeo = new THREE.BoxGeometry(500, 10, 500.9);
     const cesped = new THREE.Mesh(cespedGeo, cespedMat);
     cesped.position.set(11.951, -18.773, 49.349);
@@ -84,7 +76,7 @@ export function createCesped() {
         console.error('Error cargando los árboles:', error);
     });
 
-    // todos los Mesh de la cama proyecten y reciban sombras
+
     group.traverse((child) => {
         if (child.isMesh) {
             child.castShadow = true;

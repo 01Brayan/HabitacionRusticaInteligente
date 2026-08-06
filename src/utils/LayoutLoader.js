@@ -1,21 +1,3 @@
-// Carga las posiciones guardadas desde el archivo layout.json
-// y las aplica a los objetos de la escena por su nombre.
-//
-// También:
-// - Recrea objetos duplicados (creados con Editor3D): si el layout tiene
-//   datos de un objeto que no existe todavía, pero indica de qué
-//   "sourceName" proviene, lo clona automáticamente.
-// - Elimina objetos que fueron borrados con el editor (guardados en
-//   data.__deleted), para que no reaparezcan al recargar la página.
-//
-// IMPORTANTE: primero se recrean los duplicados y DESPUÉS se eliminan los
-// borrados. Si se hiciera al revés, borrar un objeto original eliminaría
-// también, por accidente, cualquier copia que se haya hecho de él (ya no
-// habría de dónde clonarla).
-
-// Si el objeto no tiene "sourceName" guardado (entradas viejas, de antes de
-// que Editor3D lo guardara), lo deduce a partir de su propio nombre:
-// "lamp2_copia_123_copia_456" → "lamp2"
 function inferSourceName(name, saved) {
     if (saved.sourceName) return saved.sourceName;
     const index = name.indexOf('_copia_');

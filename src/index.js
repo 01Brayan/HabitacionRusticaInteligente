@@ -1,37 +1,42 @@
-import { createScene } from './core/SceneManager.js';
-import { createCamera } from './core/CameraManager.js';
-import { createRenderer, applyEnvironment } from './core/RendererManager.js';
-import { createLights } from './lights/Lights.js';
-import { createTimeGUI } from './ui/TimeGUI.js';
-import { createCameraController } from './ui/CameraController.js';
+// ================================================================
+//  ARCHIVO PRINCIPAL DEL PROYECTO (index.js)
+// ================================================================
+//  Este archivo es el "director de orquesta": importa todos los
+//  módulos, crea la escena, agrega cada objeto y conecta los
+//  sistemas dinámicos (hora, clima, ventanas, cortinas, cámaras).
+//
+//  GUÍA RÁPIDA DE SECCIONES (borrar estos comentarios después):
+//  1. IMPORTACIONES      -> carga todos los módulos
+//  2. ESCENA/CÁMARA      -> crea la base 3D
+//  3. PISO Y MUEBLES     -> agrega los objetos de la habitación
+//  4. PAREDES Y TECHO    -> arma la estructura de la casa
+//  5. EXTERIOR           -> césped y terraza
+//  6. LUCES              -> sol, luna, cielo
+//  7. INTERFAZ HORA      -> slider del día
+//  8. CHIMENEA           -> fuego automático + manual
+//  9. CLIMA FRIO         -> niebla y tinte azulado
+// 10. VENTANAS           -> abren con calor
+// 11. CORTINAS           -> cierran de noche o con frío
+// 12. DECORACIONES       -> objetos 3D importados
+// 13. CÁMARAS Y ANIMACIÓN -> bucle final
+// ================================================================
 
-import { setupResize } from './utils/ResizeHandler.js';
-import { startAnimation } from './animations/AnimationLoop.js';
-
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-// crear cama
-import { createBed } from './objects/furniture/Bed.js';
-// crear piso
-import { createFloor } from './objects/Floor.js';
-// importar paredes
-import { createWallBack } from './objects/walls/WallBack.js';
-import { createWallRight } from './objects/walls/WallRight.js';
-import { createWallLeft } from './objects/walls/WallLeft.js';
-import { createWallWindow } from './objects/walls/WallWindow.js';
-import { createWallFront } from './objects/walls/WallFront.js';
+// ================================================================
+// 1. IMPORTACIONES (se cargan los módulos de todo el proyecto)
+// ================================================================
+import { createScene } from './core/SceneManager.js';       // crea la escena
+import { createCamera } from './core/CameraManager.js';     // crea la cámara
+import { createRenderer, applyEnvironment } from './core/RendererManager.js'; // crea el renderer + luces de entorno
+import { createLights } from './lights/Lights.js';          // sistema de luz (sol, luna, cielo)
+import { createTimeGUI } from './ui/TimeGUI.js';            // slider de hora
+import { createCameraController } from './ui/CameraController.js'; // cámaras fijas
+import { setupResize } from './utils/ResizeHandler.js';     // ajusta al redimensionar
+import { startAnimation } from './animations/AnimationLoop.js'; // bucle de animación
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js'; // vista libre con mouse
 import * as THREE from 'three';
 
-// importar techo
-import { createRoof } from './objects/Roof.js';
-
-// importar clima
-import { createClimaFrio } from './climates/ClimaFrio.js';
-
-// exterior
-import { createCesped } from './objects/exterior/Cesped.js';
-import { createTerraza } from './objects/exterior/Terraza.js';
-
-// importacion de objetos
+// --- Muebles de la habitación ---
+import { createBed } from './objects/furniture/Bed.js';
 import { createMesaDeNoche } from './objects/furniture/MesaDeNoche.js';
 import { createRopero } from './objects/furniture/ropero.js';
 import { createEstanteria } from './objects/furniture/Estanteria.js';
@@ -44,41 +49,53 @@ import { createTapeteRojo } from './objects/furniture/TapeteRojo.js';
 import { createCaja } from './objects/furniture/Caja.js';
 import { createBarril } from './objects/furniture/Barril.js';
 import { createRepisaInferior, createRepisaSuperior } from './objects/furniture/Repisa.js';
+import { createAllCortinas } from './objects/furniture/Cortinas_tela.js'; // cortinas de tela (Griselda)
 
-// import de las decoraciones
-import { createDecorations } from './objects/decorations/Decorations.js';
-import { applyLayout } from './utils/LayoutLoader.js';
-import { createAllCortinas } from './objects/furniture/Cortinas_tela.js';
+// --- Piso, paredes y techo ---
+import { createFloor } from './objects/Floor.js';
+import { createWallBack } from './objects/walls/WallBack.js';
+import { createWallRight } from './objects/walls/WallRight.js';
+import { createWallLeft } from './objects/walls/WallLeft.js';
+import { createWallWindow } from './objects/walls/WallWindow.js';
+import { createWallFront } from './objects/walls/WallFront.js';
+import { createRoof } from './objects/Roof.js';
 
-// sistema de luces interiores (lámparas + candelabro)
+// --- Exterior ---
+import { createCesped } from './objects/exterior/Cesped.js'; // césped
+import { createTerraza } from './objects/exterior/Terraza.js'; // terraza de madera
+
+// --- Decoraciones y clima ---
+import { createDecorations } from './objects/decorations/Decorations.js'; // decoraciones GLB
+import { applyLayout } from './utils/LayoutLoader.js'; // carga posiciones guardadas
+import { createClimaFrio } from './climates/ClimaFrio.js'; // modo FRIO
+
+// --- Luces interiores de los objetos (Compañero Luis) ---
 import { InteriorLightsManager, hourToDarkness } from './lights/InteriorLightsManager.js';
 
-// CONTENEDOR
-const container = document.getElementById('container');
+// ================================================================
+// 2. ESCENA, CÁMARA Y RENDERER (base del proyecto 3D)
+// ================================================================
+const container = document.getElementById('container'); // donde se dibuja el canvas
+const scene = createScene();                            // el "mundo" 3D
+const camera = createCamera();                          // la cámara (punto de vista)
+const renderer = createRenderer(container);             // motor que dibuja
+applyEnvironment(scene, renderer);                      // luz de entorno (reflejos)
 
-// ESCENA
-const scene = createScene();
-
-// CAMARA
-const camera = createCamera();
-
-// RENDERER
-const renderer = createRenderer(container);
-applyEnvironment(scene, renderer);
-// CONTROLES
+// --- Controles de vista libre (mouse) ---
 const controls = new OrbitControls(camera, renderer.domElement);
-controls.enableDamping = true;
-controls.dampingFactor = 0.08;
+controls.enableDamping = true;      // movimiento suave
+controls.dampingFactor = 0.08;      // intensidad del suavizado
 
-// CÁMARAS FIJAS (controlador con 4 cámaras + vista libre)
+// --- Cámaras fijas (4 cámaras + vista libre) ---
 const camController = createCameraController({ camera, controls });
-document.body.appendChild(camController.element);
+document.body.appendChild(camController.element); // panel de botones de cámaras
 
-// AGREGAR PISO
+// ================================================================
+// 3. PISO Y MUEBLES (los objetos de la habitación)
+// ================================================================
 const floor = createFloor();
 scene.add(floor);
 
-// AGREGAR CAMA
 const bed = createBed();
 bed.position.set(0, 0, -1);
 scene.add(bed);
@@ -139,50 +156,61 @@ const repisainf = createRepisaInferior();
 repisainf.position.set(0, 0, -1);
 scene.add(repisainf);
 
-// AGREGAR PARED TRASERA
+// ================================================================
+// 4. PAREDES Y TECHO (la estructura de la casa)
+// ================================================================
 const wallBack = createWallBack();
-wallBack.position.set(0, 0, -1);
+wallBack.position.set(0, 0, -1);   // pared trasera
 scene.add(wallBack);
-// AGREGAR PARED IZQUIERDA
+
 const wallLeft = createWallLeft();
-wallLeft.position.set(0, 0, 0);
+wallLeft.position.set(0, 0, 0);    // pared izquierda
 scene.add(wallLeft);
-// AGREGAR PARED DERECHA
+
 const wallRight = createWallRight();
-wallRight.position.set(0, 0, 0);
+wallRight.position.set(0, 0, 0);   // pared derecha
 scene.add(wallRight);
-//AGREGAR PARED FRONTAL
+
 const wallFront = createWallFront();
-wallFront.position.set(0, 0, 0);
+wallFront.position.set(0, 0, 0);   // pared frontal (puerta)
 scene.add(wallFront);
-//AGREGAR TERRENO EXTERIOR (cesped)
+
+const roof = createRoof();
+roof.position.set(0, 0, 0);        // techo
+scene.add(roof);
+
+// ================================================================
+// 5. EXTERIOR (césped y terraza frente a la puerta)
+// ================================================================
 const cesped = createCesped();
 scene.add(cesped.group);
-//AGREGAR TERRAZA EXTERIOR (frente a la puerta)
+
 const terraza = createTerraza();
 scene.add(terraza);
 
-// AGREGAR TECHO
-const roof = createRoof();
-roof.position.set(0, 0, 0);
-scene.add(roof);
-
-// LUCES (sol/luna/cielo — sistema de tu compañero)
+// ================================================================
+// 6. LUCES (sol, luna y cielo procedural)
+// ================================================================
 const lights = createLights(scene);
 
-// GUI de hora del dia
-let horaActual = 7;   // Brayan: usado por ventanas, cortinas y camaras
-let currentHour = 7;  // Waldimar: usado por la chimenea automatica
+// Variables globales de hora (compartidas por varios sistemas)
+//   horaActual -> usada por ventanas, cortinas y cámaras (Brayan)
+//   currentHour -> usada por la chimenea automática (Waldimar)
+let horaActual = 7;
+let currentHour = 7;
 
-// Determinar si la chimenea debe encenderse automáticamente según la hora
-// (5:00 AM a antes de las 8:00 AM  Y  5:30 PM [17.5] en adelante)
+// ================================================================
+// 7. CHIMENEA (fuego automático + control manual) — Waldimar
+//    Se enciende sola en horarios fríos (5-8 AM y 17:30+)
+//    y también al activar el modo FRIO.
+// ================================================================
 function isFireplaceTime(hour) {
     return (hour >= 5.0 && hour < 8.0) || (hour >= 17.5);
 }
 
 let lastFireplaceAutoState = isFireplaceTime(currentHour);
 
-// CONTROL INTERACTIVO FUEGO CHIMENEA (estilo del GUI FRIO)
+// Checkbox para encender/apagar la chimenea manualmente
 const fuegoLabel = document.createElement('label');
 fuegoLabel.style.cssText = 'color:#fff;font-family:Arial,sans-serif;font-size:0.95rem;font-weight:600;background:rgba(18,18,28,0.85);padding:10px 16px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);display:flex;align-items:center;gap:8px;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.4);transition:all 0.3s;position:fixed;bottom:70px;left:20px;z-index:10000;user-select:none;';
 
@@ -217,11 +245,13 @@ fuegoCheck.addEventListener('change', () => {
 
 const fuegoText = document.createElement('span');
 fuegoText.textContent = 'CHIMENEA';
-
 fuegoLabel.appendChild(fuegoCheck);
 fuegoLabel.appendChild(fuegoText);
 document.body.appendChild(fuegoLabel);
 
+// ================================================================
+// 8. INTERFAZ DE HORA DEL DÍA (slider)
+// ================================================================
 const gui = createTimeGUI({
     min: 5,
     max: 20,
@@ -229,9 +259,9 @@ const gui = createTimeGUI({
     onChange: (hour) => {
         horaActual = hour;
         currentHour = hour;
-        lights.setTime(hour);
+        lights.setTime(hour); // cambia el sol/cielo según la hora
 
-        // Control automático de la chimenea según horario (5:00 AM - 8:00 AM y 5:30 PM+)
+        // Control automático de la chimenea según horario
         const shouldBeOn = isFireplaceTime(hour);
         if (shouldBeOn !== lastFireplaceAutoState) {
             lastFireplaceAutoState = shouldBeOn;
@@ -244,19 +274,21 @@ const gui = createTimeGUI({
 });
 document.body.appendChild(gui.element);
 
-
-// CLIMA: MODO FRIO Y ANIMACIONES DE OBJETOS
+// ================================================================
+// 9. CLIMA FRIO (niebla + tinte azulado) — Brayan
+// ================================================================
 const climaFrio = createClimaFrio(scene, lights.hemiLight, lights.fillLight, cesped.material);
+
+// Lista de actualizadores que se ejecutan cada frame
 const climaUpdaters = [
-    climaFrio.update,
-    camController.update,
-    chiminea.userData?.updateFuego
-].filter(Boolean);
+    climaFrio.update,               // niebla + partículas del frío
+    camController.update,           // animación de cámaras
+    chiminea.userData?.updateFuego  // partículas del fuego
+].filter(Boolean);                  // quita los undefined
 
-
-// ===========================================
-// VENTANAS AUTOMATICAS (se abren con calor)
-// ===========================================
+// ================================================================
+// 10. VENTANAS AUTOMÁTICAS (se abren con calor 10h-16h) — Brayan
+// ================================================================
 const ANGULO_ABIERTA = THREE.MathUtils.degToRad(120); // 120° abierta
 const HORA_INICIO_CALOR = 10;
 const HORA_FIN_CALOR = 16;
@@ -270,27 +302,25 @@ wallLeft.traverse((child) => {
 });
 
 function updateVentanas() {
-    // Si hace calor (10-16h) y NO esta el modo frio activo → abrir
+    // Si hace calor (10-16h) y NO está el modo frío activo → abrir
     const haceCalor = horaActual >= HORA_INICIO_CALOR && horaActual <= HORA_FIN_CALOR && !climaFrio.state.activo;
     const objetivo = haceCalor ? ANGULO_ABIERTA : 0;
 
     ventanas.forEach(win => {
         win.userData.setApertura(objetivo); // fija el objetivo
-        win.userData.actualizar();          // anima suavemente hacia el
+        win.userData.actualizar();          // anima suavemente hacia él
     });
 }
 
-// Agregar al bucle de animacion
 climaUpdaters.push(updateVentanas);
-// ===========================================
 
-// ===========================================
-// CORTINAS AUTOMATICAS (se cierran de noche o con frio)
-// ===========================================
+// ================================================================
+// 11. CORTINAS AUTOMÁTICAS (cierran de noche o con frío) — Brayan
+// ================================================================
 const ESCALA_CORTINA_ABIERTA = 0.35; // recogida arriba
 const ESCALA_CORTINA_CERRADA = 1;    // estirada, cubre la ventana
 
-// Recolectar las cortinas de la pared trasera (Brayan: automaticas de noche/frio)
+// Recolectar las cortinas de la pared trasera (WallBack)
 const cortinasWallBack = [];
 wallBack.traverse((child) => {
     if (child.userData && typeof child.userData.setCortina === 'function') {
@@ -299,23 +329,27 @@ wallBack.traverse((child) => {
 });
 
 function updateCortinas() {
-    // Cerrar cortinas de noche (19h a 7h) o si hace frio
+    // Cerrar cortinas de noche (19h a 7h) o si hace frío
     const esDeNoche = horaActual >= 19 || horaActual <= 7;
     const cerrar = esDeNoche || climaFrio.state.activo;
     const objetivo = cerrar ? ESCALA_CORTINA_CERRADA : ESCALA_CORTINA_ABIERTA;
 
     cortinasWallBack.forEach(c => {
-        c.userData.setCortina(objetivo); // fija el objetivo
-        c.userData.actualizarCortina();  // anima suavemente hacia el
+        c.userData.setCortina(objetivo);   // fija el objetivo
+        c.userData.actualizarCortina();    // anima suavemente hacia él
     });
 }
 
 climaUpdaters.push(updateCortinas);
-// ===========================================
 
-// RESPONSIVE
+// ================================================================
+// RESPONSIVE (ajusta el tamaño al cambiar la ventana)
+// ================================================================
 setupResize(camera, renderer);
 
+// ================================================================
+// 12. DECORACIONES Y POSICIONES GUARDADAS
+// ================================================================
 // Asignar nombres para que layout.json pueda ubicar cada objeto
 bed.name = 'bed';
 mesaDeNoche.name = 'mesaDeNoche';
@@ -333,9 +367,8 @@ barril.name = 'barril';
 repisa.name = 'repisa';
 repisainf.name = 'repisainf';
 
-// AGREGAR DECORACIONES (objetos importados de Blender)
+// Cargar decoraciones (objetos 3D de Blender)
 const decorations = await createDecorations();
-
 scene.add(decorations);
 
 // Lista de todos los objetos que pueden tener layout guardado y/o luz interior
@@ -345,23 +378,24 @@ const allObjects = [
     cajademadera, barril, repisa, repisainf,
     ...decorations.children
 ];
-// Crear el manager de luces interiores ANTES de applyLayout
-// (así los duplicados heredan su propia luz al clonarse)
+
+// Sistema de luces interiores (lámparas + candelabro) — Luis
 const interiorLights = new InteriorLightsManager(allObjects);
 
-// Aplicar posiciones guardadas (aquí se recrean los duplicados)
+// Aplicar posiciones guardadas (recrea duplicados si hace falta)
 await applyLayout('src/assets/layout.json', allObjects, scene);
 
 // Registrar las luces de los duplicados recién creados
 interiorLights.refresh(allObjects);
 
-// AGREGAR CORTINAS 3D EN LAS VENTANAS LATERALES
+// ================================================================
+// CORTINAS DE TELA (ventanas laterales) — Griselda
+// ================================================================
 const cortinas = createAllCortinas();
 scene.add(cortinas.group);
-climaUpdaters.push(cortinas.update);
+climaUpdaters.push(cortinas.update); // animación de pliegues
 
-// CONTROL DE CORTINAS AUTOMATICAS (como las de WallBack):
-// se cierran de noche o con FRIO, y se abren de dia sin frio
+// Cierre/apertura automática igual que las de WallBack
 function updateCortinasTela() {
     const esDeNoche = horaActual >= 19 || horaActual <= 7;
     const cerrar = esDeNoche || climaFrio.state.activo;
@@ -370,7 +404,9 @@ function updateCortinasTela() {
 }
 climaUpdaters.push(updateCortinasTela);
 
-// CHECKBOX FRIO (abajo-izquierda)
+// ================================================================
+// CHECKBOX FRIO (activa/desactiva el modo frío)
+// ================================================================
 const frioLabel = document.createElement('label');
 frioLabel.style.cssText = 'position:fixed;bottom:20px;left:20px;color:#fff;font-family:Arial,sans-serif;font-size:0.95rem;font-weight:600;background:rgba(18,18,28,0.85);padding:10px 16px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);display:flex;align-items:center;gap:8px;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.4);transition:all 0.3s;z-index:10000;user-select:none;';
 
@@ -384,7 +420,7 @@ frioCheck.addEventListener('change', () => {
     climaFrio.toggle();
     if (climaFrio.state.activo) {
         frioLabel.style.background = 'rgba(58, 100, 150, 0.9)';
-        // Al activar el modo FRIO, encender automáticamente el fuego de la chimenea si estaba apagado
+        // Al activar FRIO, encender automáticamente el fuego si estaba apagado
         if (!fuegoCheck.checked) {
             fuegoCheck.checked = true;
             fuegoCheck.dispatchEvent(new Event('change'));
@@ -400,13 +436,15 @@ frioLabel.appendChild(frioCheck);
 frioLabel.appendChild(frioText);
 document.body.appendChild(frioLabel);
 
-// ANIMACION
+// ================================================================
+// 13. BUCLE DE ANIMACIÓN (inicia el renderizado en cada frame)
+// ================================================================
 startAnimation(
     renderer,
     scene,
     camera,
     controls,
-    climaUpdaters,
-    interiorLights,
-    () => hourToDarkness(currentHour)
+    climaUpdaters,               // actualizadores por frame
+    interiorLights,              // luces interiores dinámicas
+    () => hourToDarkness(currentHour) // nivel de oscuridad para las luces
 );

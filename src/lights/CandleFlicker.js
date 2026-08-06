@@ -1,6 +1,4 @@
-// Única responsabilidad: calcular la intensidad "parpadeante" de una vela,
-// a partir de su intensidad base ya suavizada.
-
+// Única responsabilidad: calcular la intensidad "parpadeante" de una vela
 export function flickerIntensity(baseIntensity, elapsed, seed = 0) {
 
     const wave =

@@ -1,4 +1,4 @@
-import * as THREE from 'three'; //asterisco significa todo
+import * as THREE from 'three';
 
 export function createScene(){
     const scene = new THREE.Scene();
@@ -6,5 +6,3 @@ export function createScene(){
     return scene;
 
 }
-
-//haber que solo se quiera ver la escena que hace la luz 

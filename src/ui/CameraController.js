@@ -3,14 +3,6 @@ import * as THREE from 'three';
 // ============================================================
 // CONTROLADOR DE CÁMARAS FIJAS
 // ============================================================
-// Hay 4 cámaras fijas + vista LIBRE (con el mouse).
-// Todas apuntan al MISMO punto fijo (el centro de la escena).
-//
-// CÓMO AJUSTAR TÚ MISMO:
-//   - CAMARAS: cambia las coordenadas "pos" y el "fov" de cada cámara
-//   - PUNTO_FIJO: el punto al que todas miran
-//   - sway: true/false para que la cámara "respire" suavemente
-// ============================================================
 
 // Punto al que TODAS las cámaras miran
 const PUNTO_FIJO = new THREE.Vector3(-0.042, 16.66, 7.525);
@@ -157,7 +149,7 @@ export function createCameraController({ camera, controls }) {
     // ============================================================
     // INICIALIZAR
     // ============================================================
-    // Cámara por defecto: Exterior (sin animación de entrada)
+    // Cámara por defecto: Exterior
     seleccionarCamara('exterior');
     camera.position.copy(posicionObjetivo);
     camera.fov = fovObjetivo;

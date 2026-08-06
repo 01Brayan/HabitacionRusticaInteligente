@@ -20,8 +20,6 @@
     font-family: Georgia, 'Times New Roman', serif; /* fallback sin instalar nada */
 }
 
-/* Si instalás una fuente serif más elegante (opcional, ver nota abajo),
-   agregá su nombre acá antes de Georgia */
 .time-gui__clock {
     display: flex;
     align-items: baseline;

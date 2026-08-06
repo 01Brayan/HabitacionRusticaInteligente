@@ -1,7 +1,4 @@
-// Nombres COMPLETOS y exactos de las lámparas que están afuera de la casa
-// (tal cual aparecen en layout.json / object.name). Si en el futuro duplicás
-// alguna de estas 3 para poner otra lámpara más afuera, no hace falta tocar
-// nada: isExteriorLamp() también reconoce sus futuros "_copia_..." hijos.
+
 const EXTERIOR_LAMP_NAMES = [
     'lampara1_copia_1785899329454_copia_1785899504033_copia_1785899833314',
     'lampara1_copia_1785899329454_copia_1785899504033_copia_1785899645766',
@@ -44,9 +41,7 @@ export const LIGHT_TYPES = [
     }
 ];
 
-// Devuelve la config del tipo correspondiente, o null si el nombre no matchea nada.
-// El orden importa: primero candelabro, después "¿es una de mis 3 exteriores?",
-// y solo si no, cae al tipo genérico "lamp" (interior).
+
 export function resolveLightType(name) {
     if (!name) return null;
 

@@ -1,27 +1,4 @@
 
-/**
- * GUI de "hora del día": barra inferior centrada, panel translúcido con
- * blur, bordes redondeados y slider con gradiente. Sin librerías externas,
- * sin PNGs — todo resuelto con DOM + CSS.
- *
- * Uso:
- *   import { createTimeGUI } from './ui/TimeGUI.js';
- *
- *   const gui = createTimeGUI({
- *     min: 5,
- *     max: 20,
- *     initial: 7,
- *     onChange: (hour) => {
- *       lights.setTime(hour);
- *       refreshSunBeams();
- *     },
- *   });
- *   document.body.appendChild(gui.element);
- *
- * Si en algún momento necesitás mover el slider desde código (por ejemplo,
- * un botón de "amanecer" que lo lleve a las 6am), usá gui.setHour(6).
- */
-
 function formatHour(hourDecimal) {
     const totalMinutes = Math.round(hourDecimal * 60);
     let h = Math.floor(totalMinutes / 60);

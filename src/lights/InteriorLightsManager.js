@@ -3,8 +3,7 @@ import { resolveLightType } from './LightTypes.js';
 import { createLight } from './LightFactory.js';
 import { flickerIntensity } from './CandleFlicker.js';
 
-// Traduce una hora (0-24) en un valor de oscuridad (0 = día pleno, 1 = noche
-// cerrada). Se calcula de forma independiente, sin depender de Lights.js.
+// 0 = día pleno, 1 = noche
 export function hourToDarkness(hour) {
 
     const h = ((hour % 24) + 24) % 24;
@@ -16,8 +15,7 @@ export function hourToDarkness(hour) {
     return THREE.MathUtils.smoothstep(h, 16.5, 20);      // atardeciendo
 }
 
-// Centro visual real del objeto (bounding box), en vez de su pivote/origen
-// de Blender (que muchas veces no coincide con dónde se ve la malla).
+// Centro visual real del objeto (bounding box)
 function getLocalVisualCenter(object) {
 
     const box = new THREE.Box3().setFromObject(object);
@@ -32,11 +30,7 @@ function getLocalVisualCenter(object) {
 // Detecta lámparas y candelabro dentro de una lista de objetos, les crea
 // una PointLight, y cada frame sube/baja su intensidad gradualmente según
 // qué tan oscuro esté (nunca de golpe).
-//
-// Debe crearse ANTES de que se recreen los objetos duplicados (antes de
-// applyLayout en index.js). Como la luz se agrega como HIJO del objeto,
-// al clonar un original su luz se clona junto con él. Llamar a refresh()
-// después de applyLayout para que el manager también controle esas copias.
+
 
 export class InteriorLightsManager {
 
